@@ -1,30 +1,44 @@
 #include <iostream>
-#include <deque>
+#include <vector>
+#include <unordered_map>
 
 using namespace std;
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-int main()
-{
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the
-    // <b>lang</b> variable name to see how CLion can help you rename it.
-    string lang = "C++";
 
-    cout << "Hello and welcome to " << lang << "!\n";
 
-    for (int i = 1; i <= 5; i++)
-    {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code.
-        // We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/>
-        // breakpoint for you, but you can always add more by pressing
-        // <shortcut actionId="ToggleLineBreakpoint"/>.
-        cout << "i = " << i << std::endl;
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+
+        unordered_map<int, int> mp;
+
+
+        for (int i = 0; i < nums.size(); i++)
+        {
+            int diff = target - nums[i];
+            if (mp.contains(diff) && mp[diff] != i)
+            {
+                return {i, mp[diff]};
+            }
+
+            mp[nums[i]] = i;
+        }
+
+        return {};
     }
+};
 
+
+int main() {
+    vector<int> v = {1, 2, 3, 4, 5, 4, 7};
+    Solution* s = new Solution();
+
+    vector<int> res = s->twoSum(v, 11);
+
+    for (int i : res) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    delete s;
     return 0;
 }
-
-// TIP See CLion help at <a
-// href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
-//  Also, you can try interactive lessons for CLion by selecting
-//  'Help | Learn IDE Features' from the main menu.

@@ -1,0 +1,3 @@
+C:/Users/aliza/CLionProjects/WaymoPrep/cmake-build-debug/CMakeFiles/WaymoPrep.dir
+C:/Users/aliza/CLionProjects/WaymoPrep/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/aliza/CLionProjects/WaymoPrep/cmake-build-debug/CMakeFiles/rebuild_cache.dir

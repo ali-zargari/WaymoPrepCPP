@@ -5,39 +5,28 @@ using namespace std;
 
 class Solution {
 public:
-    int trap(vector<int>& height) {
-        int left = 0;
-        int right = height.size()-1;
-        int water = 0;
+    int maxArea(vector<int>& heights) {
+        int l = 0, r = heights.size()-1;
+        int area = 0;
 
-        int left_wall=height[0], right_wall=height[height.size()-1];
-
-        while (left < right)
+        while (l < r)
         {
-            if (height[left] < height[right])
+            int temp = (r-l) * min(heights[l], heights[r]);
+            if (area < temp)
             {
-                if (left_wall<height[left])
-                {
-                    left_wall = height[left];
-                } else
-                {
-                    water += (left_wall-height[left]);
-                }
-                left++;
+                area = temp;
+            }
+
+            if (heights[l] < heights[r])
+            {
+                l++;
             } else
             {
-                if (right_wall<height[right])
-                {
-                    right_wall = height[right];
-                } else
-                {
-                    water += (right_wall-height[right]);
-                }
-                right--;
+                r--;
             }
         }
 
-        return water;
+        return area;
     }
 };
 
@@ -47,9 +36,9 @@ int main()
 
     Solution s;
 
-    vector<int> top = {0,2,0,3,1,0,1,3,2,1};
+    vector<int> top = {1,7,2,5,4,7,3,6};
 
-    cout << s.trap(top) << endl;
+    cout << s.maxArea(top) << endl;
 
     return 0;
 }

@@ -1,30 +1,58 @@
 #include <iostream>
-#include <deque>
+#include <vector>
+#include <map>
+#include <queue>
+
 
 using namespace std;
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+class Solution
+{
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k)
+    {
+
+        priority_queue<pair<int, int>> pq;
+        pair<int, int> p;
+        map<int, int> s;
+        vector<int> result;
+
+        for (int i = 0; i < nums.size(); i++)
+        {
+            s[nums[i]]++;
+        }
+
+        for (auto [key, value]: s)
+        {
+            cout << "(" << key << ", " << value << ") " << endl;
+            p = make_pair(value, key);
+            pq.push(p);
+        }
+
+        for (int i = 0; i < k; i++)
+        {
+            result.push_back(pq.top().second);
+            pq.pop();
+        }
+
+        return result;
+    }
+};
+
 int main()
 {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the
-    // <b>lang</b> variable name to see how CLion can help you rename it.
-    string lang = "C++";
 
-    cout << "Hello and welcome to " << lang << "!\n";
+    vector<int> in = {1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5};
+    int k = 3;
 
-    for (int i = 1; i <= 5; i++)
+    Solution s;
+    vector<int> result = s.topKFrequent(in, k);
+
+    for (const auto i: result)
     {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code.
-        // We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/>
-        // breakpoint for you, but you can always add more by pressing
-        // <shortcut actionId="ToggleLineBreakpoint"/>.
-        cout << "i = " << i << std::endl;
+        cout << i << "-";
     }
 
     return 0;
 }
 
-// TIP See CLion help at <a
-// href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
-//  Also, you can try interactive lessons for CLion by selecting
-//  'Help | Learn IDE Features' from the main menu.

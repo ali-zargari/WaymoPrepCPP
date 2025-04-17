@@ -1,30 +1,56 @@
 #include <iostream>
-#include <deque>
+#include <vector>
 
 using namespace std;
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int left = 0;
+        int right = height.size()-1;
+        int water = 0;
+
+        int left_wall=height[0], right_wall=height[height.size()-1];
+
+        while (left < right)
+        {
+            if (height[left] < height[right])
+            {
+                if (left_wall<height[left])
+                {
+                    left_wall = height[left];
+                } else
+                {
+                    water += (left_wall-height[left]);
+                }
+                left++;
+            } else
+            {
+                if (right_wall<height[right])
+                {
+                    right_wall = height[right];
+                } else
+                {
+                    water += (right_wall-height[right]);
+                }
+                right--;
+            }
+        }
+
+        return water;
+    }
+};
+
+
 int main()
 {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the
-    // <b>lang</b> variable name to see how CLion can help you rename it.
-    string lang = "C++";
 
-    cout << "Hello and welcome to " << lang << "!\n";
+    Solution s;
 
-    for (int i = 1; i <= 5; i++)
-    {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code.
-        // We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/>
-        // breakpoint for you, but you can always add more by pressing
-        // <shortcut actionId="ToggleLineBreakpoint"/>.
-        cout << "i = " << i << std::endl;
-    }
+    vector<int> top = {0,2,0,3,1,0,1,3,2,1};
+
+    cout << s.trap(top) << endl;
 
     return 0;
 }
 
-// TIP See CLion help at <a
-// href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
-//  Also, you can try interactive lessons for CLion by selecting
-//  'Help | Learn IDE Features' from the main menu.

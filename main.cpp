@@ -1,64 +1,63 @@
-#include <iomanip>
 #include <iostream>
 #include <vector>
-#include <stack>
-#include <algorithm>
-
 
 using namespace std;
 
 class Solution {
 public:
-
-
     int search(vector<int>& nums, int target) {
 
-        if (nums.size() > 0 && (nums[0] > target || target > nums[nums.size()-1]))
+
+        int l = 0;
+        int r = nums.size()-1;
+        int mid = l + (r-l)/2;
+        int min = nums[0];
+
+        while (l <= r)
         {
-            return -1;
+            mid = l + (r-l)/2;
+
+            if (nums[mid] == target)
+            {
+                return mid;
+            }
+
+            // if right side is sorted
+            if (nums[l] > nums[mid])
+            {
+                if (target > nums[mid] && target <= nums[r])
+                {
+                    l = mid + 1;
+                } else
+                {
+                    r = mid -1;
+                }
+            }
+            // if left side is sorted
+            else
+            {
+                if (target < nums[mid] && target >= nums[l])
+                {
+                    r = mid - 1;
+                } else
+                {
+                    l = mid + 1;
+                }
+            }
+
         }
 
-        return bin_search(nums, target, 0, nums.size()-1);
-
+        return -1;
     }
-
-    int bin_search(vector<int>& nums, int target, int l, int h) {
-
-        //int offset = l + (h-l) / 2;
-        int mid = l + (h-l) / 2;
-
-
-        if (l > h)
-        {
-            return -1;
-        }
-
-        if (nums[mid] == target)
-        {
-            return mid;
-        } else if (target < nums[mid])
-        {
-            return bin_search(nums, target, l, mid-1);
-        } else
-        {
-            return bin_search(nums, target, mid+1, h);
-        }
-
-    }
-
 };
 
 
-
+// Main function provided by user - unchanged.
 int main()
 {
-
     Solution s;
+    vector<int> his = {3,4,5,6,1,2};
 
-    vector<int> his = {-1,0,2,4,6,8};
-
-    cout << s.search(his, 8) << endl;
-
+    cout << s.search(his, 2) << endl;
     return 0;
 }
-

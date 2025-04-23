@@ -1,103 +1,78 @@
 #include <iostream>
+#include <queue>
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
 class Solution {
 public:
-    bool checkInclusion(string s1, string s2) {
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
 
-        // Check if s1 is longer than s2, impossible for s1 to be a permutation
-        if (s1.length() > s2.length()) {
-            return false;
+        //we can have a set of size k. initilized with nums[0] through nums[k].
+        // every time the window moves, we delete the first one, and add a new one to the set. While doing this,
+        // we keep track of a max value. to keep track of the max values, we can also use a heap. any time a max is popped,
+        // the second biggest will be first on the stack.
+
+        priority_queue<pair<int, int>> max;
+        vector<int> res;
+
+        if (k == 1)
+        {
+            return nums;
         }
 
-        // Create frequency map for s1
-        unordered_map<char, int> freq;
-        for (char c : s1) {
-            freq[c]++;
+        for (int i = 0; i < k; i++)
+        {
+            max.push(pair<int, int>(nums[i], i));
         }
-        // Store the target count (length of s1)
-        int target_count = s1.length(); // Renamed 'count' to avoid ambiguity
 
-        // Initialize sliding window pointers
+        res.push_back(max.top().first);
+
         int l = 0;
-        // r is the right boundary (inclusive), so it starts at s1.length() - 1
-        int r = s1.length() - 1;
+        int r = k-1;
+        while (r < nums.size())
+        {
 
-        // Slide the window across s2
-        while (r < s2.size()) {
-            int check = 0; // Counter for matched characters in the current window
-            bool jumped = false; // Flag to indicate if the window was jumped forward
+            l++;
+            r++;
 
-            // Create a copy of the frequency map for checking the current window
-            unordered_map<char, int> freq_copy = freq;
+            if (r < nums.size())
+            {
+                max.push(pair<int, int>(nums[r], r));
 
-            // Check characters within the current window [l, r]
-            for (int i = l; i <= r; i++) {
-                // If character s2[i] is not required by s1 (not in freq_copy)
-                if (freq_copy.find(s2[i]) == freq_copy.end()) {
-                    // Jump the left pointer past this invalid character
-                    l = i + 1;
-                    // Calculate the potential new right pointer
-                    int new_r = l + s1.length() - 1;
-
-                    // Check if the new right pointer goes out of bounds
-                    if (new_r >= s2.size()) {
-                        // Not enough characters left for a full window, impossible to find permutation
-                        return false;
-                    }
-
-                    // Update the right pointer for the next iteration of the outer loop
-                    r = new_r;
-                    jumped = true; // Mark that we jumped the window
-                    break; // Exit the inner loop for this window check
+                while (max.top().second < l) {
+                    max.pop();
                 }
 
-                // If the character s2[i] is required, but we've seen too many of them
-                if (freq_copy[s2[i]] == 0) {
-                     break; // Exit inner loop - this window failed
-                }
-
-                // Decrement the count for the found character
-                freq_copy[s2[i]]--;
-                check++; // Increment the count of matched characters
-
-                // If all characters from s1 are accounted for in this window
-                if (check == target_count) {
-                    return true; // Found a permutation!
-                }
-            } // End of inner for loop (window check)
-
-            // If the window check completed without finding a permutation
-            // AND we didn't jump the window due to an invalid character
-            if (!jumped) {
-                // Slide the window one step to the right
-                l++;
-                r++;
+                if (!max.empty())
+                    res.push_back(max.top().first);
             }
-            // If we *did* jump, 'l' and 'r' are already set for the next
-            // iteration of the outer while loop.
+
         }
 
-        // If the loop finishes without returning true, no permutation was found
-        return false;
+        return res;
     }
 };
+
+
 
 // Main function provided by user - unchanged.
 int main()
 {
     Solution s;
-    cout << boolalpha; // Print true/false instead of 1/0
-    cout << s.checkInclusion("adc", "dcda") << endl; // Output: true
-    cout << s.checkInclusion("ab", "eidbaooo") << endl; // Output: true
-    cout << s.checkInclusion("ab", "eidboaoo") << endl; // Output: false
-    cout << s.checkInclusion("a", "b") << endl; // Output: false
-    cout << s.checkInclusion("hello", "ooolleoooleh") << endl; // Output: false
+    vector<int> nums = {7, 2, 4};
+    vector<int> results = s.maxSlidingWindow(nums, 2);
 
+    //cout << s.maxSlidingWindow(nums, 3) << endl; // Output: true
+
+    for (auto i : results)
+    {
+        cout << i << " ";
+    }
+    
 
     return 0;
 }

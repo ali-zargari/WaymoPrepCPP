@@ -1,40 +1,49 @@
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 
 using namespace std;
 
 class Solution {
 public:
-    int maxProfit(vector<int>& prices) {
-        int profit = 0;
-        int l = 0, r = 1;
+    int lengthOfLongestSubstring(string s) {
+        // lets say we have a string 'xyzxyzc'.
+        // We want to find the length of the longest substring with unique characters.
+        // We can keep adding chars to a set. When we find a character that exists, keep track of the length of the set (using max function), and clear set.
+        // We keep adding to the newly cleared set, until we hit the same thing again
 
-        while (r < prices.size())
+        unordered_set<char> sequence;
+        int len = 0;
+        int left = 0;
+
+        for (int i = 0; i < s.size(); i++)
         {
-            if (prices[r] > prices[l])
+            if (sequence.find(s[i]) != sequence.end())
             {
-                profit = max(profit, prices[r] - prices[l]);
-
-            } else
-            {
-                l = r;
+                len = max(len, (int) sequence.size());
+                while (sequence.find(s[i]) != sequence.end())
+                {
+                    sequence.erase(s[left]);
+                    left++;
+                }
             }
-            r++;
+
+            sequence.insert(s[i]);
+
         }
-
-        return profit;
-
+        return max(len, (int) sequence.size());
     }
 };
+
 
 // Main function provided by user - unchanged.
 int main()
 {
     Solution s;
-    vector<int> his = {5, 1, 5, 6, 7, 1};
+    //vector<int> his = {5, 1, 5, 6, 7, 1};
 
     //vector<int> his2 = {1, 2, 3, 3, 4, 5 };
 
-    cout << s.maxProfit(his) << endl;
+    cout << s.lengthOfLongestSubstring("dvdf") << endl;
     return 0;
 }

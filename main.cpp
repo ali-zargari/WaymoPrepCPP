@@ -5,51 +5,25 @@ using namespace std;
 
 class Solution {
 public:
-    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+    int maxProfit(vector<int>& prices) {
+        int profit = 0;
+        int l = 0, r = 1;
 
-        vector<int>& A = nums1;
-        vector<int>& B = nums2;
-
-        if (A.size() > B.size())
+        while (r < prices.size())
         {
-            swap(A, B);
-        }
-
-        int a_length = A.size();
-        int b_length = B.size();
-
-        int l = 0;
-        int r = a_length;
-
-        while (l <= r)
-        {
-            int a_part = (l + r)/2;
-            int b_part = (a_length + b_length + 1) / 2 - a_part;
-
-            int a_left = (a_part == 0) ? INT_MIN : A[a_part-1];
-            int a_right = (a_part == a_length) ? INT_MAX : A[a_part];
-            int b_left = (b_part == 0) ? INT_MIN : B[b_part-1];
-            int b_right = (b_part == b_length) ? INT_MAX : B[b_part];
-
-            if (a_left <= b_right && b_left <= a_right)
+            if (prices[r] > prices[l])
             {
-                if ((a_length + b_length) %2 == 0)
-                {
-                    return (max(a_left, b_left) + min(a_right, b_right)) / 2.0;
-                }
-                return max(a_left, b_left);
+                profit = max(profit, prices[r] - prices[l]);
 
-            } else if (a_left > b_right)
-            {
-                r = a_part - 1;
             } else
             {
-                l = a_part + 1;
+                l = r;
             }
-
+            r++;
         }
 
-        return -1;
+        return profit;
+
     }
 };
 
@@ -57,9 +31,10 @@ public:
 int main()
 {
     Solution s;
-    vector<int> his = {0, 2, 3, 6, 7};
-    vector<int> his2 = {1, 2, 3, 3, 4, 5 };
+    vector<int> his = {5, 1, 5, 6, 7, 1};
 
-    cout << s.findMedianSortedArrays(his, his2) << endl;
+    //vector<int> his2 = {1, 2, 3, 3, 4, 5 };
+
+    cout << s.maxProfit(his) << endl;
     return 0;
 }

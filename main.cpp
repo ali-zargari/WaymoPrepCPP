@@ -66,6 +66,38 @@ public:
         res = max(res, left+right);
         return 1 + max(left, right);
     }
+
+    int dfs(TreeNode* root, bool& balanced)
+    {
+        if (!root)
+        {
+            return true;
+        }
+
+        int left = dfs(root->left, balanced);
+        int right = dfs(root->right, balanced);
+
+        if (abs(left-right) > 1)
+        {
+            balanced = false;
+        }
+
+        return 1 + max(left, right);
+    }
+
+    bool isBalanced(TreeNode* root) {
+        if (!root)
+        {
+            return true;
+        }
+
+        bool balanced = true;
+
+        dfs(root, balanced);
+
+        return balanced;
+
+    }
 };
 
 
@@ -93,13 +125,19 @@ int main()
 
     // Test case 1: Empty tree
     TreeNode* root1 = nullptr;
-    cout << "Test Case 1: Diameter of empty tree: " << s.diameterOfBinaryTree(root1) << endl;
-    cout << "Test Case 1: Depth of empty tree: " << s.depth(root1) << endl;
+    cout << "Test Case 1: Empty tree" << endl;
+    cout << "Diameter: " << s.diameterOfBinaryTree(root1) << endl;
+    cout << "Depth: " << s.depth(root1) << endl;
+    cout << "Is Balanced: " << (s.isBalanced(root1) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
 
     // Test case 2: Single node tree
     TreeNode* root2 = new TreeNode(1);
-    cout << "Test Case 2: Diameter of single node tree: " << s.diameterOfBinaryTree(root2) << endl;
-    cout << "Test Case 2: Depth of single node tree: " << s.depth(root2) << endl;
+    cout << "Test Case 2: Single node tree" << endl;
+    cout << "Diameter: " << s.diameterOfBinaryTree(root2) << endl;
+    cout << "Depth: " << s.depth(root2) << endl;
+    cout << "Is Balanced: " << (s.isBalanced(root2) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
 
     // Test case 3: Balanced binary tree
     //      1
@@ -108,8 +146,11 @@ int main()
     //   / \
     //  4   5
     TreeNode* root3 = createTree({1, 2, 3, 4, 5});
-    cout << "Test Case 3: Diameter of balanced binary tree: " << s.diameterOfBinaryTree(root3) << endl;
-    cout << "Test Case 3: Depth of balanced binary tree: " << s.depth(root3) << endl;
+    cout << "Test Case 3: Balanced binary tree" << endl;
+    cout << "Diameter: " << s.diameterOfBinaryTree(root3) << endl;
+    cout << "Depth: " << s.depth(root3) << endl;
+    cout << "Is Balanced: " << (s.isBalanced(root3) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
 
     // Test case 4: Linear tree (skewed to the left)
     //      1
@@ -118,8 +159,11 @@ int main()
     //   /
     //  3
     TreeNode* root4 = createTree({1, 2, -1, 3});
-    cout << "Test Case 4: Diameter of left-skewed tree: " << s.diameterOfBinaryTree(root4) << endl;
-    cout << "Test Case 4: Depth of left-skewed tree: " << s.depth(root4) << endl;
+    cout << "Test Case 4: Left-skewed tree" << endl;
+    cout << "Diameter: " << s.diameterOfBinaryTree(root4) << endl;
+    cout << "Depth: " << s.depth(root4) << endl;
+    cout << "Is Balanced: " << (s.isBalanced(root4) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
 
     // Test case 5: Linear tree (skewed to the right)
     // 1
@@ -128,8 +172,11 @@ int main()
     //    \
     //     3
     TreeNode* root5 = createTree({1, -1, 2, -1, -1, -1, 3});
-    cout << "Test Case 5: Diameter of right-skewed tree: " << s.diameterOfBinaryTree(root5) << endl;
-    cout << "Test Case 5: Depth of right-skewed tree: " << s.depth(root5) << endl;
+    cout << "Test Case 5: Right-skewed tree" << endl;
+    cout << "Diameter: " << s.diameterOfBinaryTree(root5) << endl;
+    cout << "Depth: " << s.depth(root5) << endl;
+    cout << "Is Balanced: " << (s.isBalanced(root5) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
 
     // Test case 6: Unbalanced binary tree
     //      1
@@ -142,9 +189,27 @@ int main()
     //     \
     //      6
     TreeNode* root6 = createTree({1, 2, 3, 4, -1, -1, -1, -1, 5, -1, -1, -1, -1, -1, 6});
-    cout << "Test Case 6: Diameter of unbalanced binary tree: " << s.diameterOfBinaryTree(root6) << endl;
-    cout << "Test Case 6: Depth of unbalanced binary tree: " << s.depth(root6) << endl;
+    cout << "Test Case 6: Unbalanced binary tree" << endl;
+    cout << "Diameter: " << s.diameterOfBinaryTree(root6) << endl;
+    cout << "Depth: " << s.depth(root6) << endl;
+    cout << "Is Balanced: " << (s.isBalanced(root6) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
 
+
+    // Test case 7: Symmetrical but unbalanced binary tree
+    //      1
+    //     / \
+    //    2   2
+    //   /     \
+    //  3       3
+    // /         \
+    // 4           4
+    TreeNode* root7 = createTree({1, 2, 2, 3, -1, -1, 3, 4, -1, -1, 4});
+    cout << "Test Case 7: Symmetrical but unbalanced binary tree" << endl;
+    cout << "Diameter: " << s.diameterOfBinaryTree(root7) << endl;
+    cout << "Depth: " << s.depth(root7) << endl;
+    cout << "Is Balanced: " << (s.isBalanced(root7) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
 
     return 0;
 }

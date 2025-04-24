@@ -5,47 +5,83 @@
 #include <unordered_map>
 // #include <unordered_set> // Not used
 #include <limits> // For numeric_limits
+#include <stack>
 
 using namespace std;
+
+struct TreeNode
+{
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode() : val(0), left(nullptr), right(nullptr)
+    {
+    }
+
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr)
+    {
+    }
+
+    TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right)
+    {
+    }
+};
 
 class Solution
 {
 public:
-    struct TreeNode
+    // can either use a global variable.
+    // can also use a helper function which has an integer parameter.
+    // can also use an iterative method using a stack for DFS. let's use this method.
+
+    int maxDepthIterate(TreeNode* root) //DFS
     {
-        int val;
-        TreeNode* left;
-        TreeNode* right;
+        if (!root)
+            return 0;
 
-        TreeNode() : val(0), left(nullptr), right(nullptr)
+        stack<pair<TreeNode*, int>> st;
+
+        st.push({root, 1});
+        int res = 1;
+
+        while (!st.empty())
         {
+            TreeNode* curr = st.top().first;
+            int curr_depth = st.top().second;
+
+            st.pop();
+
+
+            res = max(res, curr_depth);
+
+            if (curr->right)
+            {
+                st.push({curr->right, curr_depth + 1});
+            }
+
+            if (curr->left)
+            {
+                st.push({curr->left, curr_depth + 1});
+            }
         }
 
-        TreeNode(int x) : val(x), left(nullptr), right(nullptr)
-        {
-        }
+        return res;
+    }
 
-        TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right)
-        {
-        }
-    };
 
-    TreeNode* invertTree(TreeNode* root) //DFS
+    int maxDepth(TreeNode* root) //DFS
     {
-
         if (!root)
         {
-            return nullptr;
+            return 0;
         }
 
-        TreeNode* temp = root->left;
-        root->left = root->right;
-        root->right = temp;
+        int left = maxDepth(root->left) + 1;
+        int right = maxDepth(root->right) + 1;
 
-        invertTree(root->left);
-        invertTree(root->right);
+        return max(left, right);
 
-        return root;
     }
 };
 
@@ -56,45 +92,43 @@ int main()
     Solution s;
 
 
-    // Test Case 1: Empty tree
-    Solution::TreeNode* root1 = nullptr;
-    Solution::TreeNode* result1 = s.invertTree(root1);
-    cout << "Test Case 1: " << (result1 == nullptr ? "Passed" : "Failed") << endl;
+    // Test case 1: Empty tree (root is nullptr)
+    TreeNode* root1 = nullptr;
+    cout << "Test case 1 (Empty tree): " << s.maxDepth(root1) << endl; // Expected output: 0
 
-    // Test Case 2: Single-node tree
-    Solution::TreeNode* root2 = new Solution::TreeNode(1);
-    Solution::TreeNode* result2 = s.invertTree(root2);
-    cout << "Test Case 2: " << (result2->val == 1 && result2->left == nullptr && result2->right == nullptr
-                                    ? "Passed"
-                                    : "Failed") << endl;
+    // Test case 2: Single-node tree
+    TreeNode* root2 = new TreeNode(1);
+    cout << "Test case 2 (Single-node tree): " << s.maxDepth(root2) << endl; // Expected output: 1
 
-    // Test Case 3: Simple binary tree
-    Solution::TreeNode* root3 =
-        new Solution::TreeNode(1,
-                               new Solution::TreeNode(2),
-                               new Solution::TreeNode(3));
-    Solution::TreeNode* result3 = s.invertTree(root3);
-    cout << "Test Case 3: " << (result3->val == 1 && result3->left->val == 3 && result3->right->val == 2
-                                    ? "Passed"
-                                    : "Failed") << endl;
+    // Test case 3: Tree with two levels
+    TreeNode* root3 = new TreeNode(1);
+    root3->left = new TreeNode(2);
+    root3->right = new TreeNode(3);
+    cout << "Test case 3 (Two levels): " << s.maxDepth(root3) << endl; // Expected output: 2
 
-    // Test Case 4: Larger binary tree
-    Solution::TreeNode* root4;
-    root4 = new Solution::TreeNode(4,
-                                   new Solution::TreeNode(2,
-                                                          new Solution::TreeNode(1),
-                                                          new Solution::TreeNode(3)),
-                                   new Solution::TreeNode(7,
-                                                          new Solution::TreeNode(6),
-                                                          new Solution::TreeNode(9)));
-    Solution::TreeNode* result4 = s.invertTree(root4);
-    cout << "Test Case 4: "
-        << (result4->val == 4 &&
-            result4->left->val == 7 && result4->right->val == 2 &&
-            result4->left->left->val == 9 && result4->left->right->val == 6 &&
-            result4->right->left->val == 3 && result4->right->right->val == 1
-                ? "Passed"
-                : "Failed")
-        << endl;
+    // Test case 4: Tree with three levels
+    TreeNode* root4 = new TreeNode(1);
+    root4->left = new TreeNode(2);
+    root4->right = new TreeNode(3);
+    root4->left->left = new TreeNode(4);
+    root4->left->right = new TreeNode(5);
+    root4->right->right = new TreeNode(6);
+    cout << "Test case 4 (Three levels): " << s.maxDepth(root4) << endl; // Expected output: 3
+
+    // Test case 5: Skewed tree (all nodes to the left)
+    TreeNode* root5 = new TreeNode(1);
+    root5->left = new TreeNode(2);
+    root5->left->left = new TreeNode(3);
+    root5->left->left->left = new TreeNode(4);
+    cout << "Test case 5 (Left-skewed tree): " << s.maxDepth(root5) << endl; // Expected output: 4
+
+    // Test case 6: Skewed tree (all nodes to the right)
+    TreeNode* root6 = new TreeNode(1);
+    root6->right = new TreeNode(2);
+    root6->right->right = new TreeNode(3);
+    root6->right->right->right = new TreeNode(4);
+    cout << "Test case 6 (Right-skewed tree): " << s.maxDepth(root6) << endl; // Expected output: 4
+
+
     return 0;
 }

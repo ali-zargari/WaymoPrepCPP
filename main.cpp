@@ -8,117 +8,44 @@
 
 using namespace std;
 
-class Solution {
+class Solution
+{
 public:
-    string minWindow(string s, string t) {
-        if (t.empty() || s.empty() || t.length() > s.length()) {
-            return "";
+    struct TreeNode
+    {
+        int val;
+        TreeNode* left;
+        TreeNode* right;
+
+        TreeNode() : val(0), left(nullptr), right(nullptr)
+        {
         }
 
-        unordered_map<char, int> chars_needed; // Target counts from t
-        for (char c : t) {
-            chars_needed[c]++;
+        TreeNode(int x) : val(x), left(nullptr), right(nullptr)
+        {
         }
 
-        unordered_map<char, int> chars_copy; // Remaining needed chars for current window attempt
+        TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right)
+        {
+        }
+    };
 
-        int l = 0; // Left pointer, scans for start
-        int r = 0; // Right pointer, expands window
-        int start_of_current_window = -1; // Track where the current valid window started
-        bool move_right = false; // Flag to control expansion phase
+    TreeNode* invertTree(TreeNode* root) //DFS
+    {
 
-        // Result tracking
-        string min_res = "";
-        int min_len = numeric_limits<int>::max();
+        if (!root)
+        {
+            return nullptr;
+        }
 
-        // Outer loop primarily driven by 'l' advancing or resets
-        while (l < s.size()) {
+        TreeNode* temp = root->left;
+        root->left = root->right;
+        root->right = temp;
 
-            if (!move_right) {
-                // Phase 1: Advance 'l' to find a potential window start
-                start_of_current_window = l; // Record potential start before check
+        invertTree(root->left);
+        invertTree(root->right);
 
-                if (chars_needed.contains(s[l])) { // Found a character that is needed
-                    // Start a new window attempt
-                    chars_copy = chars_needed; // Reset the needed counts
-
-                    // Process the starting character s[l]
-                    // (Safe access because we know chars_needed contains s[l])
-                    chars_copy[s[l]]--;
-                    if (chars_copy[s[l]] == 0) {
-                        chars_copy.erase(s[l]);
-                    }
-
-                    // Check if t has only 1 character and we found it
-                    if (chars_copy.empty()) {
-                         if (1 < min_len) { // Length is 1
-                             min_len = 1;
-                             min_res = s.substr(l, 1);
-                         }
-                         // Continue searching from the next position
-                         l++;
-                         r = l; // Keep r aligned
-                         // move_right remains false
-                         continue; // Go to next iteration of outer loop
-                    }
-
-                    // Switch to expansion phase
-                    move_right = true;
-                    r = l + 1; // Start r right after l
-                    // *** FIX: Do not increment l here, let the end of the block handle it only if needed ***
-
-                } else {
-                    // s[l] is not needed, advance l
-                    l++;
-                    r = l; // Keep r aligned
-                    // move_right remains false
-                }
-
-            } else { // move_right is true: Expanding phase
-                // *** FIX: Check if r is out of bounds ***
-                if (r >= s.size()) {
-                    // Reached end of s while expanding, this window attempt failed.
-                    // No more windows possible starting at start_of_current_window or later.
-                    break; // Exit the outer while loop
-                }
-
-                char char_r = s[r];
-
-                // Process the character s[r] being added to the window
-                // Only decrement count if it's a character we *still* need
-                if (chars_copy.contains(char_r)) {
-                    chars_copy[char_r]--;
-                    if (chars_copy[char_r] == 0) {
-                        chars_copy.erase(char_r);
-                    }
-                }
-                // Removed the problematic 'l = r - 1;' line here
-
-                // Check if we have found a complete window
-                if (chars_copy.empty()) {
-                    // Found a valid window s[start_of_current_window ... r]
-                    int current_len = r - start_of_current_window + 1;
-                    // *** FIX: Compare length correctly ***
-                    if (min_res.empty() || current_len < min_len) {
-                        min_len = current_len;
-                        // *** FIX: Use substr based on start and length ***
-                        min_res = s.substr(start_of_current_window, current_len);
-                    }
-
-                    // Resetting for next window search:
-                    l = start_of_current_window + 1; // Start search after the beginning of the found window
-                    r = l; // Reset r to align with new l
-                    move_right = false; // Go back to phase 1 (advancing l)
-                    // chars_copy will be reset when phase 1 finds a start
-
-                } else {
-                     // Window not complete yet, continue expanding
-                     r++;
-                }
-            } // End of if (!move_right) / else
-        } // End of outer while loop
-
-        return min_res;
+        return root;
     }
 };
 
@@ -127,26 +54,47 @@ public:
 int main()
 {
     Solution s;
-    string s1 = "ADOBECODEBANC";
-    string s2 = "ABC";
-    cout << "'" << s.minWindow(s1, s2) << "'" << endl; // Expected: 'BANC'
-
-    string s3 = "OUZODYXAZV";
-    string t3 = "XYZ";
-    cout << "'" << s.minWindow(s3, t3) << "'" << endl; // Expected: 'YXAZ'
-
-    string s4 = "a";
-    string t4 = "a";
-    cout << "'" << s.minWindow(s4, t4) << "'" << endl; // Expected: 'a'
-
-     string s5 = "a";
-    string t5 = "aa";
-    cout << "'" << s.minWindow(s5, t5) << "'" << endl; // Expected: ""
-
-    string s6 = "aa";
-    string t6 = "aa";
-    cout << "'" << s.minWindow(s6, t6) << "'" << endl; // Expected: "aa"
 
 
+    // Test Case 1: Empty tree
+    Solution::TreeNode* root1 = nullptr;
+    Solution::TreeNode* result1 = s.invertTree(root1);
+    cout << "Test Case 1: " << (result1 == nullptr ? "Passed" : "Failed") << endl;
+
+    // Test Case 2: Single-node tree
+    Solution::TreeNode* root2 = new Solution::TreeNode(1);
+    Solution::TreeNode* result2 = s.invertTree(root2);
+    cout << "Test Case 2: " << (result2->val == 1 && result2->left == nullptr && result2->right == nullptr
+                                    ? "Passed"
+                                    : "Failed") << endl;
+
+    // Test Case 3: Simple binary tree
+    Solution::TreeNode* root3 =
+        new Solution::TreeNode(1,
+                               new Solution::TreeNode(2),
+                               new Solution::TreeNode(3));
+    Solution::TreeNode* result3 = s.invertTree(root3);
+    cout << "Test Case 3: " << (result3->val == 1 && result3->left->val == 3 && result3->right->val == 2
+                                    ? "Passed"
+                                    : "Failed") << endl;
+
+    // Test Case 4: Larger binary tree
+    Solution::TreeNode* root4;
+    root4 = new Solution::TreeNode(4,
+                                   new Solution::TreeNode(2,
+                                                          new Solution::TreeNode(1),
+                                                          new Solution::TreeNode(3)),
+                                   new Solution::TreeNode(7,
+                                                          new Solution::TreeNode(6),
+                                                          new Solution::TreeNode(9)));
+    Solution::TreeNode* result4 = s.invertTree(root4);
+    cout << "Test Case 4: "
+        << (result4->val == 4 &&
+            result4->left->val == 7 && result4->right->val == 2 &&
+            result4->left->left->val == 9 && result4->left->right->val == 6 &&
+            result4->right->left->val == 3 && result4->right->right->val == 1
+                ? "Passed"
+                : "Failed")
+        << endl;
     return 0;
 }

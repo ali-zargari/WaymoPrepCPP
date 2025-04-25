@@ -28,93 +28,20 @@ struct TreeNode
 class Solution
 {
 public:
-    // can either use a global variable.
-    // can also use a helper function which has an integer parameter.
-    // can also use an iterative method using a stack for DFS. let's use this method.
 
-
-    int diameterOfBinaryTree(TreeNode* root) //DFS
-    {
-        int len = 0;
-        dfs(root, len);
-        return len;
-    }
-
-    int depth(TreeNode* root)
-    {
-        if (!root)
-        {
-            return 0;
-        }
-
-        return max(depth(root->left) + 1, depth(root->right) + 1);
-    }
-
-    int dfs(TreeNode* root, int& res)
-    {
-        if (!root)
-        {
-            return 0;
-        }
-
-        int left = dfs(root->left, res);
-        int right = dfs(root->right, res);
-        res = max(res, left + right);
-        return 1 + max(left, right);
-    }
-
-    int dfs(TreeNode* root, bool& balanced)
-    {
-        if (!root)
-        {
-            return true;
-        }
-
-        int left = dfs(root->left, balanced);
-        int right = dfs(root->right, balanced);
-
-        if (abs(left - right) > 1)
-        {
-            balanced = false;
-        }
-
-        return 1 + max(left, right);
-    }
-
-    bool isBalanced(TreeNode* root)
-    {
-        if (!root)
-        {
-            return true;
-        }
-
-        bool balanced = true;
-
-        dfs(root, balanced);
-
-        return balanced;
-    }
 
     bool isSameTree(TreeNode* p, TreeNode* q)
     {
+
         if (!p && !q)
         {
             return true;
         }
 
-        if (p == nullptr && q != nullptr)
+        if (p && q && p->val == q->val)
         {
-            return false;
-        }
-
-        if (q == nullptr && p != nullptr)
-        {
-            return false;
-        }
-
-        if (p->val == q->val)
             return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
-
+        }
 
         return false;
     }
@@ -122,111 +49,113 @@ public:
 
     bool isSameTreeIter(TreeNode* p, TreeNode* q)
     {
-        if (!p && !q)
-        {
-            return true;
-        }
 
-        if (p == nullptr && q != nullptr)
-        {
-            return false;
-        }
+        stack<pair<TreeNode*, TreeNode*>> stk;
+        stk.emplace(p, q);
 
-        if (q == nullptr && p != nullptr)
+        while (!stk.empty())
         {
-            return false;
-        }
 
-        if (p->val == q->val)
-        {
-            stack<pair<TreeNode*, TreeNode*>> node_stack;
-            node_stack.push({p, q});
+            pair curr = {stk.top().first, stk.top().second};
+            stk.pop();
 
-            while (!node_stack.empty())
+            if (!curr.first && !curr.second)
             {
-                auto [first, second] = node_stack.top();
-                node_stack.pop();
-
-                if (!first && !second) continue;
-
-                if (!first || !second || first->val != second->val)
-                {
-                    return false;
-                }
-
-                node_stack.push({first->right, second->right});
-                node_stack.push({first->left, second->left});
+                continue;
             }
+
+            if (!curr.first || !curr.second)
+            {
+                return false;
+            }
+
+            if (curr.first->val != curr.second->val)
+            {
+                return false;
+            }
+
+            stk.emplace(curr.first->right, curr.second->right);
+            stk.emplace(curr.first->left, curr.second->left);
+
+
         }
+
         return true;
     }
 
     bool isSubtree(TreeNode* root, TreeNode* subRoot)
     {
-        if (!root && !subRoot)
-        {
-            return true;
-        }
+
+        stack <pair<TreeNode*, TreeNode*>> stk;
+        stk.emplace(root, subRoot);
 
         if (!root && subRoot)
         {
             return false;
         }
 
-        if (root && !subRoot)
+        if (!subRoot && root)
         {
             return false;
         }
 
-        stack<TreeNode*> node_stack;
-        node_stack.push(root);
-
-        while (!node_stack.empty())
+        if (!subRoot && !root)
         {
-            TreeNode* curr = node_stack.top();
-            node_stack.pop();
+            return true;
+        }
 
-            if (curr->val == subRoot->val)
+        while (!stk.empty())
+        {
+
+            pair curr = stk.top();
+            stk.pop();
+
+            if (curr.first->val == curr.second->val)
             {
+                stack <pair<TreeNode*, TreeNode*>> check_stk;
+                check_stk.push(curr);
                 bool match = true;
 
-                // rename this so it doesn’t shadow:
-                stack<pair<TreeNode*, TreeNode*>> compare_stack;
-                // no need for curr_copy; we seed the pair directly
-                compare_stack.push({curr, subRoot});
-
-                while (!compare_stack.empty())
+                while (!check_stk.empty())
                 {
-                    auto [main_node, sub_node] = compare_stack.top();
-                    compare_stack.pop();
+                    pair checking_curr = check_stk.top();
+                    check_stk.pop();
 
-                    if (!main_node && !sub_node) continue;
-                    if (!main_node || !sub_node || main_node->val != sub_node->val)
+                    if (!checking_curr.first && !checking_curr.second)
+                    {
+                        continue;
+                    }
+
+                    if (!checking_curr.first || !checking_curr.second)
                     {
                         match = false;
                         break;
                     }
 
-                    // push children in lock-step
-                    compare_stack.push({main_node->right, sub_node->right});
-                    compare_stack.push({main_node->left, sub_node->left});
+                    if (checking_curr.first->val != checking_curr.second->val)
+                    {
+                        match = false;
+                        break;
+                    }
+
+
+                    check_stk.emplace(checking_curr.first->right, checking_curr.second->right);
+                    check_stk.emplace(checking_curr.first->left, checking_curr.second->left);
                 }
 
-                if (match) return true;
-            }
-            else
-            {
-                if (curr->right)
+                if (match)
                 {
-                    node_stack.push(curr->right);
+                    return true;
                 }
+            }
 
-                if (curr->left)
-                {
-                    node_stack.push(curr->left);
-                }
-            }
+            if (curr.first->right)
+                stk.emplace(curr.first->right, subRoot);
+
+            if (curr.first->left)
+                stk.emplace(curr.first->left, subRoot);
         }
+
 
         return false;
     }
@@ -251,96 +180,6 @@ TreeNode* createTree(const vector<int>& values, int index = 0)
 int main()
 {
     Solution s;
-
-
-    // Test case 1: Empty tree
-    TreeNode* root1 = nullptr;
-    cout << "Test Case 1: Empty tree" << endl;
-    cout << "Diameter: " << s.diameterOfBinaryTree(root1) << endl;
-    cout << "Depth: " << s.depth(root1) << endl;
-    cout << "Is Balanced: " << (s.isBalanced(root1) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
-
-    // Test case 2: Single node tree
-    TreeNode* root2 = new TreeNode(1);
-    cout << "Test Case 2: Single node tree" << endl;
-    cout << "Diameter: " << s.diameterOfBinaryTree(root2) << endl;
-    cout << "Depth: " << s.depth(root2) << endl;
-    cout << "Is Balanced: " << (s.isBalanced(root2) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
-
-    // Test case 3: Balanced binary tree
-    //      1
-    //     / \
-    //    2   3
-    //   / \
-    //  4   5
-    TreeNode* root3 = createTree({1, 2, 3, 4, 5});
-    cout << "Test Case 3: Balanced binary tree" << endl;
-    cout << "Diameter: " << s.diameterOfBinaryTree(root3) << endl;
-    cout << "Depth: " << s.depth(root3) << endl;
-    cout << "Is Balanced: " << (s.isBalanced(root3) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
-
-    // Test case 4: Linear tree (skewed to the left)
-    //      1
-    //     /
-    //    2
-    //   /
-    //  3
-    TreeNode* root4 = createTree({1, 2, -1, 3});
-    cout << "Test Case 4: Left-skewed tree" << endl;
-    cout << "Diameter: " << s.diameterOfBinaryTree(root4) << endl;
-    cout << "Depth: " << s.depth(root4) << endl;
-    cout << "Is Balanced: " << (s.isBalanced(root4) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
-
-    // Test case 5: Linear tree (skewed to the right)
-    // 1
-    //  \
-    //   2
-    //    \
-    //     3
-    TreeNode* root5 = createTree({1, -1, 2, -1, -1, -1, 3});
-    cout << "Test Case 5: Right-skewed tree" << endl;
-    cout << "Diameter: " << s.diameterOfBinaryTree(root5) << endl;
-    cout << "Depth: " << s.depth(root5) << endl;
-    cout << "Is Balanced: " << (s.isBalanced(root5) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
-
-    // Test case 6: Unbalanced binary tree
-    //      1
-    //     / \
-    //    2   3
-    //   /
-    //  4
-    //   \
-    //    5
-    //     \
-    //      6
-    TreeNode* root6 = createTree({1, 2, 3, 4, -1, -1, -1, -1, 5, -1, -1, -1, -1, -1, 6});
-    cout << "Test Case 6: Unbalanced binary tree" << endl;
-    cout << "Diameter: " << s.diameterOfBinaryTree(root6) << endl;
-    cout << "Depth: " << s.depth(root6) << endl;
-    cout << "Is Balanced: " << (s.isBalanced(root6) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
-
-
-    // Test case 7: Symmetrical but unbalanced binary tree
-    //      1
-    //     / \
-    //    2   2
-    //   /     \
-    //  3       3
-    // /         \
-    // 4           4
-    TreeNode* root7 = createTree({1, 2, 2, 3, -1, -1, 3, 4, -1, -1, 4});
-    cout << "Test Case 7: Symmetrical but unbalanced binary tree" << endl;
-    cout << "Diameter: " << s.diameterOfBinaryTree(root7) << endl;
-    cout << "Depth: " << s.depth(root7) << endl;
-    cout << "Is Balanced: " << (s.isBalanced(root7) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
-
 
     // Test case 8: Identical trees
     TreeNode* p1 = createTree({1, 2, 3});

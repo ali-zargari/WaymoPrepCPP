@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -30,14 +31,13 @@ public:
     // can either use a global variable.
     // can also use a helper function which has an integer parameter.
     // can also use an iterative method using a stack for DFS. let's use this method.
-    
+
 
     int diameterOfBinaryTree(TreeNode* root) //DFS
     {
         int len = 0;
         dfs(root, len);
         return len;
-
     }
 
     int depth(TreeNode* root)
@@ -47,7 +47,7 @@ public:
             return 0;
         }
 
-        return max(depth(root->left)+1,  depth(root->right)+1);
+        return max(depth(root->left) + 1, depth(root->right) + 1);
     }
 
     int dfs(TreeNode* root, int& res)
@@ -59,7 +59,7 @@ public:
 
         int left = dfs(root->left, res);
         int right = dfs(root->right, res);
-        res = max(res, left+right);
+        res = max(res, left + right);
         return 1 + max(left, right);
     }
 
@@ -73,7 +73,7 @@ public:
         int left = dfs(root->left, balanced);
         int right = dfs(root->right, balanced);
 
-        if (abs(left-right) > 1)
+        if (abs(left - right) > 1)
         {
             balanced = false;
         }
@@ -81,7 +81,8 @@ public:
         return 1 + max(left, right);
     }
 
-    bool isBalanced(TreeNode* root) {
+    bool isBalanced(TreeNode* root)
+    {
         if (!root)
         {
             return true;
@@ -92,19 +93,22 @@ public:
         dfs(root, balanced);
 
         return balanced;
-
     }
 
-    bool isSameTree(TreeNode* p, TreeNode* q) {
-        if (!p && !q){
+    bool isSameTree(TreeNode* p, TreeNode* q)
+    {
+        if (!p && !q)
+        {
             return true;
         }
 
-        if (p == nullptr && q != nullptr) {
+        if (p == nullptr && q != nullptr)
+        {
             return false;
         }
 
-        if (q == nullptr && p != nullptr) {
+        if (q == nullptr && p != nullptr)
+        {
             return false;
         }
 
@@ -113,10 +117,120 @@ public:
 
 
         return false;
+    }
 
+
+    bool isSameTreeIter(TreeNode* p, TreeNode* q)
+    {
+        if (!p && !q)
+        {
+            return true;
+        }
+
+        if (p == nullptr && q != nullptr)
+        {
+            return false;
+        }
+
+        if (q == nullptr && p != nullptr)
+        {
+            return false;
+        }
+
+        if (p->val == q->val)
+        {
+            stack<pair<TreeNode*, TreeNode*>> node_stack;
+            node_stack.push({p, q});
+
+            while (!node_stack.empty())
+            {
+                auto [first, second] = node_stack.top();
+                node_stack.pop();
+
+                if (!first && !second) continue;
+
+                if (!first || !second || first->val != second->val)
+                {
+                    return false;
+                }
+
+                node_stack.push({first->right, second->right});
+                node_stack.push({first->left, second->left});
+            }
+        }
+        return true;
+    }
+
+    bool isSubtree(TreeNode* root, TreeNode* subRoot)
+    {
+        if (!root && !subRoot)
+        {
+            return true;
+        }
+
+        if (!root && subRoot)
+        {
+            return false;
+        }
+
+        if (root && !subRoot)
+        {
+            return false;
+        }
+
+        stack<TreeNode*> node_stack;
+        node_stack.push(root);
+
+        while (!node_stack.empty())
+        {
+            TreeNode* curr = node_stack.top();
+            node_stack.pop();
+
+            if (curr->val == subRoot->val)
+            {
+                bool match = true;
+
+                // rename this so it doesn’t shadow:
+                stack<pair<TreeNode*, TreeNode*>> compare_stack;
+                // no need for curr_copy; we seed the pair directly
+                compare_stack.push({curr, subRoot});
+
+                while (!compare_stack.empty())
+                {
+                    auto [main_node, sub_node] = compare_stack.top();
+                    compare_stack.pop();
+
+                    if (!main_node && !sub_node) continue;
+                    if (!main_node || !sub_node || main_node->val != sub_node->val)
+                    {
+                        match = false;
+                        break;
+                    }
+
+                    // push children in lock-step
+                    compare_stack.push({main_node->right, sub_node->right});
+                    compare_stack.push({main_node->left, sub_node->left});
+                }
+
+                if (match) return true;
+            }
+            else
+            {
+                if (curr->right)
+                {
+                    node_stack.push(curr->right);
+                }
+
+                if (curr->left)
+                {
+                    node_stack.push(curr->left);
+                }
+            }
+        }
+
+        return false;
     }
 };
-
 
 
 // Helper function to create a binary tree
@@ -137,7 +251,6 @@ TreeNode* createTree(const vector<int>& values, int index = 0)
 int main()
 {
     Solution s;
-
 
 
     // Test case 1: Empty tree
@@ -233,21 +346,109 @@ int main()
     TreeNode* p1 = createTree({1, 2, 3});
     TreeNode* q1 = createTree({1, 2, 3});
     cout << "Test Case 8: Identical trees" << endl;
-    cout << "Is Same Tree: " << (s.isSameTree(p1, q1) ? "Yes" : "No") << endl;
+    cout << "Is Same Tree: " << (s.isSameTreeIter(p1, q1) ? "Yes" : "No") << endl;
     cout << "--------------------------" << endl;
 
     // Test case 9: Different trees (structure)
     TreeNode* p2 = createTree({1, 2});
     TreeNode* q2 = createTree({1, -1, 2});
     cout << "Test Case 9: Different trees (structure)" << endl;
-    cout << "Is Same Tree: " << (s.isSameTree(p2, q2) ? "Yes" : "No") << endl;
+    cout << "Is Same Tree: " << (s.isSameTreeIter(p2, q2) ? "Yes" : "No") << endl;
     cout << "--------------------------" << endl;
 
     // Test case 10: Different trees (values)
     TreeNode* p3 = createTree({1, 2, 1});
     TreeNode* q3 = createTree({1, 1, 2});
     cout << "Test Case 10: Different trees (values)" << endl;
-    cout << "Is Same Tree: " << (s.isSameTree(p3, q3) ? "Yes" : "No") << endl;
+    cout << "Is Same Tree: " << (s.isSameTreeIter(p3, q3) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+
+    // Test case 11: subtree
+    // Tree S:
+    //      3
+    //     / \
+    //    4   5
+    //   / \
+    //  1   2
+    //
+    // Tree T:
+    //    4
+    //   / \
+    //  1   2
+    TreeNode* S1 = createTree({1, 1});
+    TreeNode* T1 = createTree({1});
+    cout << "Test Case 11: T is a subtree of S" << endl;
+    cout << "Is Subtree: " << (s.isSubtree(S1, T1) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+    // Test case 12: T is not a subtree of S
+    // Tree S:
+    //      3
+    //     / \
+    //    4   5
+    //   / \
+    //  1   2
+    //
+    // Tree T:
+    //    4
+    //   /
+    //  1
+    TreeNode* S2 = createTree({3, 4, 5, 1, 2});
+    TreeNode* T2 = createTree({4, 1});
+    cout << "Test Case 12: T is not a subtree of S" << endl;
+    cout << "Is Subtree: " << (s.isSubtree(S2, T2) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+    // Test case 13: T is identical to S
+    // Tree S:
+    //      3
+    //     / \
+    //    4   5
+    TreeNode* S3 = createTree({3, 4, 5});
+    TreeNode* T3 = createTree({3, 4, 5});
+    cout << "Test Case 13: T is identical to S" << endl;
+    cout << "Is Subtree: " << (s.isSubtree(S3, T3) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+    // Test case 14: S is empty, T is not
+    TreeNode* S4 = nullptr;
+    TreeNode* T4 = createTree({1});
+    cout << "Test Case 14: S is empty, T is not" << endl;
+    cout << "Is Subtree: " << (s.isSubtree(S4, T4) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+    // Test case 15: T is empty
+    TreeNode* S5 = createTree({1, 2, 3});
+    TreeNode* T5 = nullptr;
+    cout << "Test Case 15: T is empty" << endl;
+    cout << "Is Subtree: " << (s.isSubtree(S5, T5) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+    // Test case 16: Both S and T are empty
+    TreeNode* S6 = nullptr;
+    TreeNode* T6 = nullptr;
+    cout << "Test Case 16: Both S and T are empty" << endl;
+    cout << "Is Subtree: " << (s.isSubtree(S6, T6) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+
+    // Test case 17: Non-matching subtree
+    // Tree S:
+    //      3
+    //     / \
+    //    4   5
+    //   / \
+    //  1   2
+    //
+    // Tree T:
+    //    4
+    //   / \
+    //  1   3
+    TreeNode* S7 = createTree({3, 4, 5, 1, 2});
+    TreeNode* T7 = createTree({4, 1, 3});
+    cout << "Test Case 17: T is not a matching subtree of S" << endl;
+    cout << "Is Subtree: " << (s.isSubtree(S7, T7) ? "Yes" : "No") << endl;
     cout << "--------------------------" << endl;
 
     return 0;

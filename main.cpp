@@ -28,136 +28,20 @@ struct TreeNode
 class Solution
 {
 public:
-
-
-    bool isSameTree(TreeNode* p, TreeNode* q)
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q)
     {
 
-        if (!p && !q)
+        if (p->val > root->val && q->val > root->val)
         {
-            return true;
+            return lowestCommonAncestor(root->right, p, q);
+        }
+        else if (p->val < root->val && q->val < root->val)
+        {
+            return lowestCommonAncestor(root->left, p, q);
         }
 
-        if (p && q && p->val == q->val)
-        {
-            return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
-        }
+        return root;
 
-        return false;
-    }
-
-
-    bool isSameTreeIter(TreeNode* p, TreeNode* q)
-    {
-
-        stack<pair<TreeNode*, TreeNode*>> stk;
-        stk.emplace(p, q);
-
-        while (!stk.empty())
-        {
-
-            pair curr = {stk.top().first, stk.top().second};
-            stk.pop();
-
-            if (!curr.first && !curr.second)
-            {
-                continue;
-            }
-
-            if (!curr.first || !curr.second)
-            {
-                return false;
-            }
-
-            if (curr.first->val != curr.second->val)
-            {
-                return false;
-            }
-
-            stk.emplace(curr.first->right, curr.second->right);
-            stk.emplace(curr.first->left, curr.second->left);
-
-
-        }
-
-        return true;
-    }
-
-    bool isSubtree(TreeNode* root, TreeNode* subRoot)
-    {
-
-        stack <pair<TreeNode*, TreeNode*>> stk;
-        stk.emplace(root, subRoot);
-
-        if (!root && subRoot)
-        {
-            return false;
-        }
-
-        if (!subRoot && root)
-        {
-            return false;
-        }
-
-        if (!subRoot && !root)
-        {
-            return true;
-        }
-
-        while (!stk.empty())
-        {
-
-            pair curr = stk.top();
-            stk.pop();
-
-            if (curr.first->val == curr.second->val)
-            {
-                stack <pair<TreeNode*, TreeNode*>> check_stk;
-                check_stk.push(curr);
-                bool match = true;
-
-                while (!check_stk.empty())
-                {
-                    pair checking_curr = check_stk.top();
-                    check_stk.pop();
-
-                    if (!checking_curr.first && !checking_curr.second)
-                    {
-                        continue;
-                    }
-
-                    if (!checking_curr.first || !checking_curr.second)
-                    {
-                        match = false;
-                        break;
-                    }
-
-                    if (checking_curr.first->val != checking_curr.second->val)
-                    {
-                        match = false;
-                        break;
-                    }
-
-
-                    check_stk.emplace(checking_curr.first->right, checking_curr.second->right);
-                    check_stk.emplace(checking_curr.first->left, checking_curr.second->left);
-                }
-
-                if (match)
-                {
-                    return true;
-                }
-            }
-
-            if (curr.first->right)
-                stk.emplace(curr.first->right, subRoot);
-
-            if (curr.first->left)
-                stk.emplace(curr.first->left, subRoot);
-        }
-
-
-        return false;
     }
 };
 
@@ -179,116 +63,96 @@ TreeNode* createTree(const vector<int>& values, int index = 0)
 // Main function provided by user - unchanged.
 int main()
 {
+
     Solution s;
 
-    // Test case 8: Identical trees
-    TreeNode* p1 = createTree({1, 2, 3});
-    TreeNode* q1 = createTree({1, 2, 3});
-    cout << "Test Case 8: Identical trees" << endl;
-    cout << "Is Same Tree: " << (s.isSameTreeIter(p1, q1) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test cases for lowestCommonAncestor
+    // Helper lambda to display TreeNode's value
+    auto displayResult = [](TreeNode* node)
+    {
+        if (node)
+        {
+            cout << "Lowest Common Ancestor: " << node->val << endl;
+        }
+        else
+        {
+            cout << "Lowest Common Ancestor: nullptr" << endl;
+        }
+    };
 
-    // Test case 9: Different trees (structure)
-    TreeNode* p2 = createTree({1, 2});
-    TreeNode* q2 = createTree({1, -1, 2});
-    cout << "Test Case 9: Different trees (structure)" << endl;
-    cout << "Is Same Tree: " << (s.isSameTreeIter(p2, q2) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 1: Basic BST
+    vector<int> values1 = {6, 2, 8, 0, 4, 7, 9, -1, -1, 3, 5};
+    TreeNode* root1 = createTree(values1);
+    TreeNode* p1 = root1->left; // Node 2
+    TreeNode* q1 = root1->right; // Node 8
+    TreeNode* result1 = s.lowestCommonAncestor(root1, p1, q1);
+    cout << "Test Case 1: Expected: 6, Got: ";
+    displayResult(result1);
 
-    // Test case 10: Different trees (values)
-    TreeNode* p3 = createTree({1, 2, 1});
-    TreeNode* q3 = createTree({1, 1, 2});
-    cout << "Test Case 10: Different trees (values)" << endl;
-    cout << "Is Same Tree: " << (s.isSameTreeIter(p3, q3) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 2: Both p and q are in the left subtree
+    TreeNode* p2 = root1->left->right->left; // Node 3
+    TreeNode* q2 = root1->left->right->right; // Node 5
+    TreeNode* result2 = s.lowestCommonAncestor(root1, p2, q2);
+    cout << "Test Case 2: Expected: 4, Got: ";
+    displayResult(result2);
 
+    // Test Case 3: One node is an ancestor of the other
+    TreeNode* p3 = root1->left; // Node 2
+    TreeNode* q3 = root1->left->right; // Node 4
+    TreeNode* result3 = s.lowestCommonAncestor(root1, p3, q3);
+    cout << "Test Case 3: Expected: 2, Got: ";
+    displayResult(result3);
 
-    // Test case 11: subtree
-    // Tree S:
-    //      3
-    //     / \
-    //    4   5
-    //   / \
-    //  1   2
-    //
-    // Tree T:
-    //    4
-    //   / \
-    //  1   2
-    TreeNode* S1 = createTree({1, 1});
-    TreeNode* T1 = createTree({1});
-    cout << "Test Case 11: T is a subtree of S" << endl;
-    cout << "Is Subtree: " << (s.isSubtree(S1, T1) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 4: Both nodes are in the right subtree
+    TreeNode* p4 = root1->right->left; // Node 7
+    TreeNode* q4 = root1->right->right; // Node 9
+    TreeNode* result4 = s.lowestCommonAncestor(root1, p4, q4);
+    cout << "Test Case 4: Expected: 8, Got: ";
+    displayResult(result4);
 
-    // Test case 12: T is not a subtree of S
-    // Tree S:
-    //      3
-    //     / \
-    //    4   5
-    //   / \
-    //  1   2
-    //
-    // Tree T:
-    //    4
-    //   /
-    //  1
-    TreeNode* S2 = createTree({3, 4, 5, 1, 2});
-    TreeNode* T2 = createTree({4, 1});
-    cout << "Test Case 12: T is not a subtree of S" << endl;
-    cout << "Is Subtree: " << (s.isSubtree(S2, T2) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 5: p and q are the same node
+    TreeNode* p5 = root1->left->right; // Node 4
+    TreeNode* q5 = root1->left->right; // Node 4
+    TreeNode* result5 = s.lowestCommonAncestor(root1, p5, q5);
+    cout << "Test Case 5: Expected: 4, Got: ";
+    displayResult(result5);
 
-    // Test case 13: T is identical to S
-    // Tree S:
-    //      3
-    //     / \
-    //    4   5
-    TreeNode* S3 = createTree({3, 4, 5});
-    TreeNode* T3 = createTree({3, 4, 5});
-    cout << "Test Case 13: T is identical to S" << endl;
-    cout << "Is Subtree: " << (s.isSubtree(S3, T3) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 6: Both p and q are root
+    TreeNode* p6 = root1; // Root Node 6
+    TreeNode* q6 = root1; // Root Node 6
+    TreeNode* result6 = s.lowestCommonAncestor(root1, p6, q6);
+    cout << "Test Case 6: Expected: 6, Got: ";
+    displayResult(result6);
 
-    // Test case 14: S is empty, T is not
-    TreeNode* S4 = nullptr;
-    TreeNode* T4 = createTree({1});
-    cout << "Test Case 14: S is empty, T is not" << endl;
-    cout << "Is Subtree: " << (s.isSubtree(S4, T4) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 7: p and q are in opposite extreme leaf positions
+    TreeNode* p7 = root1->left->left; // Node 0
+    TreeNode* q7 = root1->right->right; // Node 9
+    TreeNode* result7 = s.lowestCommonAncestor(root1, p7, q7);
+    cout << "Test Case 7: Expected: 6, Got: ";
+    displayResult(result7);
 
-    // Test case 15: T is empty
-    TreeNode* S5 = createTree({1, 2, 3});
-    TreeNode* T5 = nullptr;
-    cout << "Test Case 15: T is empty" << endl;
-    cout << "Is Subtree: " << (s.isSubtree(S5, T5) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 8: Invalid tree with one node
+    TreeNode* root2 = new TreeNode(1);
+    TreeNode* p8 = root2; // Node 1
+    TreeNode* q8 = root2; // Node 1
+    TreeNode* result8 = s.lowestCommonAncestor(root2, p8, q8);
+    cout << "Test Case 8: Expected: 1, Got: ";
+    displayResult(result8);
 
-    // Test case 16: Both S and T are empty
-    TreeNode* S6 = nullptr;
-    TreeNode* T6 = nullptr;
-    cout << "Test Case 16: Both S and T are empty" << endl;
-    cout << "Is Subtree: " << (s.isSubtree(S6, T6) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 9: Non-consecutive nodes that don't form an ancestor relationship in BST
+    TreeNode* p9 = root1->left->left; // Node 0
+    TreeNode* q9 = root1->left->right; // Node 4
+    TreeNode* result9 = s.lowestCommonAncestor(root1, p9, q9);
+    cout << "Test Case 9: Expected: 2, Got: ";
+    displayResult(result9);
 
-
-    // Test case 17: Non-matching subtree
-    // Tree S:
-    //      3
-    //     / \
-    //    4   5
-    //   / \
-    //  1   2
-    //
-    // Tree T:
-    //    4
-    //   / \
-    //  1   3
-    TreeNode* S7 = createTree({3, 4, 5, 1, 2});
-    TreeNode* T7 = createTree({4, 1, 3});
-    cout << "Test Case 17: T is not a matching subtree of S" << endl;
-    cout << "Is Subtree: " << (s.isSubtree(S7, T7) ? "Yes" : "No") << endl;
-    cout << "--------------------------" << endl;
+    // Test Case 10: Tree is empty
+    TreeNode* root3 = nullptr;
+    TreeNode* p10 = nullptr;
+    TreeNode* q10 = nullptr;
+    TreeNode* result10 = s.lowestCommonAncestor(root3, p10, q10);
+    cout << "Test Case 10: Expected: nullptr, Got: ";
+    displayResult(result10);
 
     return 0;
 }

@@ -1,11 +1,7 @@
 #include <iostream>
-// #include <queue> // Not used
 #include <string>
-#include <vector> // Not used
-#include <unordered_map>
-// #include <unordered_set> // Not used
-#include <limits> // For numeric_limits
-#include <stack>
+#include <vector>
+
 
 using namespace std;
 
@@ -96,6 +92,27 @@ public:
         dfs(root, balanced);
 
         return balanced;
+
+    }
+
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        if (!p && !q){
+            return true;
+        }
+
+        if (p == nullptr && q != nullptr) {
+            return false;
+        }
+
+        if (q == nullptr && p != nullptr) {
+            return false;
+        }
+
+        if (p->val == q->val)
+            return isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
+
+
+        return false;
 
     }
 };
@@ -209,6 +226,28 @@ int main()
     cout << "Diameter: " << s.diameterOfBinaryTree(root7) << endl;
     cout << "Depth: " << s.depth(root7) << endl;
     cout << "Is Balanced: " << (s.isBalanced(root7) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+
+    // Test case 8: Identical trees
+    TreeNode* p1 = createTree({1, 2, 3});
+    TreeNode* q1 = createTree({1, 2, 3});
+    cout << "Test Case 8: Identical trees" << endl;
+    cout << "Is Same Tree: " << (s.isSameTree(p1, q1) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+    // Test case 9: Different trees (structure)
+    TreeNode* p2 = createTree({1, 2});
+    TreeNode* q2 = createTree({1, -1, 2});
+    cout << "Test Case 9: Different trees (structure)" << endl;
+    cout << "Is Same Tree: " << (s.isSameTree(p2, q2) ? "Yes" : "No") << endl;
+    cout << "--------------------------" << endl;
+
+    // Test case 10: Different trees (values)
+    TreeNode* p3 = createTree({1, 2, 1});
+    TreeNode* q3 = createTree({1, 1, 2});
+    cout << "Test Case 10: Different trees (values)" << endl;
+    cout << "Is Same Tree: " << (s.isSameTree(p3, q3) ? "Yes" : "No") << endl;
     cout << "--------------------------" << endl;
 
     return 0;

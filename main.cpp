@@ -26,38 +26,36 @@ struct TreeNode
     }
 };
 
+
 class Solution {
 public:
-    //We can do a postorder DFS. This way we compute the children, and compare to parents.
-    //
-    int goodNodes(TreeNode* root)
-    {
-
-        int res = dfs(root, INT_MIN);
-
-        return res;
+    // we can do an in-order traversal
+    int kthSmallest(TreeNode* root, int k) {
+        vector<int> res;
+        return dfs(root, res, k);
+        //return res[k];
     }
 
-
-    int dfs(TreeNode* root, int path_max)
+    int dfs(TreeNode* root, vector<int>& res, int k)
     {
-
         if (!root)
         {
             return 0;
         }
 
-        int left = dfs(root->left, max(path_max, root->val));
-        int right = dfs(root->right, max(path_max, root->val));
+        int val = dfs(root->left, res, k);
 
-
-        if (root->val >= path_max)
+        if (val)
         {
-            return left + right + 1;
+            return val;
         }
-        return left + right;
 
+        res.push_back(root->val);
 
+        if (res.size() == k)
+            return res.back();
+
+        return dfs(root->right, res, k);
     }
 };
 
@@ -84,64 +82,23 @@ int main()
     Solution s;
 
 
-    // Test case 1: Single node tree
-    {
-        TreeNode* root = createTree({3});
-        int actual = s.goodNodes(root);
-        int expected = 1;
-        cout << "Test case 1: " << (actual == expected ? "Passed" : "Failed")
-            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
-        delete root;
-    }
+    // Test cases for the kthSmallest function
+    vector<int> treeValues = {3, 1, 4, -1, 2}; // -1 represents null nodes
+    TreeNode* root = createTree(treeValues);
 
-    // Test case 2: All nodes are good nodes (strictly increasing values in path)
-    {
-        TreeNode* root = createTree({3, 2, 4, 1, -1, 5});
-        int actual = s.goodNodes(root);
-        int expected = 3;
-        cout << "Test case 2: " << (actual == expected ? "Passed" : "Failed")
-            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
-        delete root;
-    }
+    int k = 1; // Example input to find the 1st smallest
+    cout << "Test 1 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 1)" << endl;
 
-    // Test case 3: Only root is a good node
-    {
-        TreeNode* root = createTree({3, 2, 1});
-        int actual = s.goodNodes(root);
-        int expected = 1;
-        cout << "Test case 3: " << (actual == expected ? "Passed" : "Failed")
-            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
-        delete root;
-    }
+    k = 2; // Example to find the 2nd smallest
+    cout << "Test 2 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 2)" << endl;
 
-    // Test case 4: All nodes are bad except the root
-    {
-        TreeNode* root = createTree({3, 1, 1, 0});
-        int actual = s.goodNodes(root);
-        int expected = 1;
-        cout << "Test case 4: " << (actual == expected ? "Passed" : "Failed")
-            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
-        delete root;
-    }
+    k = 3; // Example to find the 3rd smallest
+    cout << "Test 3 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 3)" << endl;
 
-    // Test case 5: Mixed case
-    {
-        TreeNode* root = createTree({3, 3, 4, 2, 1, 5});
-        int actual = s.goodNodes(root);
-        int expected = 3;
-        cout << "Test case 5: " << (actual == expected ? "Passed" : "Failed")
-            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
-        delete root;
-    }
+    k = 4; // Example to find the 4th smallest
+    cout << "Test 4 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 4)" << endl;
 
-    // Test case 6: Empty tree
-    {
-        TreeNode* root = nullptr;
-        int actual = s.goodNodes(root);
-        int expected = 0;
-        cout << "Test case 6: " << (actual == expected ? "Passed" : "Failed")
-            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
-    }
-
+    // Don't forget to free the allocated memory after tests
+    
     return 0;
 }

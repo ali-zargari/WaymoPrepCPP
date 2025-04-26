@@ -1,6 +1,7 @@
 #include <iostream>
 #include <queue>
 #include <stack>
+#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -28,51 +29,172 @@ struct TreeNode
 
 class Solution {
 public:
-    vector<int> rightSideView(TreeNode* root) {
+
+
+    vector<int> preOrder(TreeNode* root)
+    {
+        TreeNode* node;
+        stack<TreeNode*> stk;
         vector<int> res;
 
-        if (!root)
+        stk.push(root);
+
+        while (!stk.empty())
         {
-            return res;
+            TreeNode* node = stk.top();
+            stk.pop();
+            res.push_back(node->val);
+
+            if (node->right)
+            {
+                stk.push(node->right);
+            }
+            if (node->left)
+            {
+                stk.push(node->left);
+            }
         }
 
-        queue<TreeNode*> q;
-        q.push(root);
-        TreeNode* node;
+        return res;
+    }
 
+
+
+    vector<int> bfs(TreeNode* root)
+    {
+        TreeNode* node;
+        queue<TreeNode*> q;
+        vector<int> res;
+
+        q.push(root);
 
         while (!q.empty())
         {
+            TreeNode* node = q.front();
+            q.pop();
+            res.push_back(node->val);
 
-            int size = q.size();
-
-            for (int i = 0; i < size; i++)
+            if (node->left)
             {
-                node = q.front();
-                q.pop();
+                q.push(node->left);
+            }
 
-                if (node->left)
-                {
-                    q.push(node->left);
-                }
-
-                if (node->right)
-                {
-                    q.push(node->right);
-                }
-
-                if (i == size-1)
-                {
-                    res.push_back(node->val);
-                }
-
+            if (node->right)
+            {
+                q.push(node->right);
             }
 
         }
 
         return res;
     }
+
+
+
+    vector<int> inOrder(TreeNode* root)
+    {
+        TreeNode* node = root;
+        stack<TreeNode*> stk;
+        vector<int> res;
+
+        while (!stk.empty() || node)
+        {
+            
+            while (node)
+            {
+                stk.push(node);
+                node = node->left;
+            }
+
+            node = stk.top();
+            stk.pop();
+            res.push_back(node->val);
+
+            node = node->right;
+            
+        }
+        return res;
+    }
+
+    
+    vector<int> postOrder(TreeNode* root)
+    {
+        TreeNode* node;
+        stack<TreeNode*> stk;
+        stack<TreeNode*> stk2;
+        vector<int> res;
+
+        stk.push(root);
+
+        while (!stk.empty())
+        {
+            TreeNode* node = stk.top();
+            stk.pop();
+            stk2.push(node);
+
+            if (node->left)
+            {
+                stk.push(node->left);
+            }
+
+            if (node->right)
+            {
+                stk.push(node->right);
+            }
+
+        }
+
+        while (!stk2.empty())
+        {
+            res.push_back(stk2.top()->val);
+            stk2.pop();
+        }
+
+        return res;
+    }
+
+
+    int goodNodes(TreeNode* root) {
+        //This looks like a DFS function. We keep going down the nodes. We can do it iteratively. While going down, we
+        //keep the maximum val node we have found in that path (can use a stack). Use max() function to keep track of highest value in path.
+        //This is missing a part of the logic because we are doing pre-order traversal. But if we do Post order, then we can effectively see
+        //which children are larger.
+        
+        stack<TreeNode*> stk;
+        stack<TreeNode*> max_nodes;
+        int max = INT32_MIN;
+        int count = 0;
+        
+        stk.push(root);
+        max_nodes.push(root);
+        
+        while (!stk.empty())
+        {
+            TreeNode* node = stk.top();
+            
+            
+            if (!max_nodes.empty() && node->val >= max_nodes.top()->val)
+            {
+                count ++;
+                max_nodes.push(node);
+                //max = node->val;
+            }
+            
+            stk.pop();
+
+            if (node->right)
+            {
+                stk.push(node->right);
+            }
+            if (node->left)
+            {
+                stk.push(node->left);
+            }
+        }
+        return count;
+    }
 };
+
 
 
 
@@ -97,60 +219,108 @@ int main()
     Solution s;
 
 
-    // Test Case 1: Simple binary tree
-    vector<int> values1 = {1, 2, 3, -1, 5, -1, 4};
-    TreeNode* root1 = createTree(values1);
-    vector<int> result1 = s.rightSideView(root1);
-    cout << "Right Side View (Test Case 1): ";
-    for (int val : result1)
+    // Create a binary tree:
+    //         5
+    //       /   \
+    //      3     7
+    //     / \   / \
+    //    2   4 6   8
+    vector<int> treeValues = {5, 3, 7, 2, 4, 6, 8};
+    TreeNode* root = createTree(treeValues);
+
+    // Expected results
+    vector<int> expectedPreOrder = {5, 3, 2, 4, 7, 6, 8};
+    vector<int> expectedBFS = {5, 3, 7, 2, 4, 6, 8};
+    vector<int> expectedInOrder = {2, 3, 4, 5, 6, 7, 8};
+
+    // Call preOrder
+    vector<int> result = s.preOrder(root);
+
+    // Compare and print
+    cout << "preOrder traversal: [";
+    for (size_t i = 0; i < result.size(); ++i)
     {
-        cout << val << " ";
+        cout << result[i];
+        if (i < result.size() - 1) cout << ", ";
     }
+    cout << "]" << endl;
+
+    cout << "Expected: [";
+    for (size_t i = 0; i < expectedPreOrder.size(); ++i)
+    {
+        cout << expectedPreOrder[i];
+        if (i < expectedPreOrder.size() - 1) cout << ", ";
+    }
+    cout << "]" << endl;
+
     cout << endl;
 
-    // Test Case 2: Binary tree with only root node
-    vector<int> values2 = {1};
-    TreeNode* root2 = createTree(values2);
-    vector<int> result2 = s.rightSideView(root2);
-    cout << "Right Side View (Test Case 2): ";
-    for (int val : result2)
+    // Call bfs
+    result = s.bfs(root);
+
+    // Compare and print
+    cout << "BFS traversal: [";
+    for (size_t i = 0; i < result.size(); ++i)
     {
-        cout << val << " ";
+        cout << result[i];
+        if (i < result.size() - 1) cout << ", ";
     }
+    cout << "]" << endl;
+
+    cout << "Expected: [";
+    for (size_t i = 0; i < expectedBFS.size(); ++i)
+    {
+        cout << expectedBFS[i];
+        if (i < expectedBFS.size() - 1) cout << ", ";
+    }
+    cout << "]" << endl;
+
     cout << endl;
 
-    // Test Case 3: Empty binary tree
-    vector<int> values3 = {};
-    TreeNode* root3 = createTree(values3);
-    vector<int> result3 = s.rightSideView(root3);
-    cout << "Right Side View (Test Case 3): ";
-    for (int val : result3)
+    // Call inOrder
+    result = s.inOrder(root);
+
+    // Compare and print
+    cout << "inOrder traversal: [";
+    for (size_t i = 0; i < result.size(); ++i)
     {
-        cout << val << " ";
+        cout << result[i];
+        if (i < result.size() - 1) cout << ", ";
     }
+    cout << "]" << endl;
+
+    cout << "Expected: [";
+    for (size_t i = 0; i < expectedInOrder.size(); ++i)
+    {
+        cout << expectedInOrder[i];
+        if (i < expectedInOrder.size() - 1) cout << ", ";
+    }
+    cout << "]" << endl;
+
     cout << endl;
 
-    // Test Case 4: Left-skewed binary tree
-    vector<int> values4 = {1, 2, -1, 3, -1, -1, -1};
-    TreeNode* root4 = createTree(values4);
-    vector<int> result4 = s.rightSideView(root4);
-    cout << "Right Side View (Test Case 4): ";
-    for (int val : result4)
-    {
-        cout << val << " ";
-    }
-    cout << endl;
+    // Call postOrder
+    result = s.postOrder(root);
 
-    // Test Case 5: Right-skewed binary tree
-    vector<int> values5 = {1, -1, 2, -1, -1, -1, 3};
-    TreeNode* root5 = createTree(values5);
-    vector<int> result5 = s.rightSideView(root5);
-    cout << "Right Side View (Test Case 5): ";
-    for (int val : result5)
+    // Compare and print
+    cout << "postOrder traversal: [";
+    for (size_t i = 0; i < result.size(); ++i)
     {
-        cout << val << " ";
+        cout << result[i];
+        if (i < result.size() - 1) cout << ", ";
     }
-    cout << endl;
+    cout << "]" << endl;
+
+    // Expected post-order traversal
+    vector<int> expectedPostOrder = {2, 4, 3, 6, 8, 7, 5};
+
+    cout << "Expected: [";
+    for (size_t i = 0; i < expectedPostOrder.size(); ++i)
+    {
+        cout << expectedPostOrder[i];
+        if (i < expectedPostOrder.size() - 1) cout << ", ";
+    }
+    cout << "]" << endl;
 
     return 0;
 }

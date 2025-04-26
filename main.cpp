@@ -26,55 +26,54 @@ struct TreeNode
     }
 };
 
-class Solution
-{
+class Solution {
 public:
-    vector<vector<int>> levelOrder(TreeNode* root) {
-
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> res;
 
         if (!root)
         {
-            return vector<vector<int>>();
+            return res;
         }
 
         queue<TreeNode*> q;
         q.push(root);
+        TreeNode* node;
 
-        vector<vector<int>> res;
-
-        int index = 0;
 
         while (!q.empty())
         {
 
-
-            res.push_back(vector<int>());
             int size = q.size();
+
             for (int i = 0; i < size; i++)
             {
-                TreeNode* node = q.front();
+                node = q.front();
                 q.pop();
-
-                res[index].push_back(node->val);
 
                 if (node->left)
                 {
                     q.push(node->left);
                 }
+
                 if (node->right)
                 {
                     q.push(node->right);
                 }
+
+                if (i == size-1)
+                {
+                    res.push_back(node->val);
+                }
+
             }
-
-
-            index++;
 
         }
 
         return res;
     }
 };
+
 
 
 // Helper function to create a binary tree
@@ -98,46 +97,60 @@ int main()
     Solution s;
 
 
-    // Test cases
-    vector<pair<vector<int>, vector<vector<int>>>> testCases = {
-        {{3, 9, 20, -1, -1, 15, 7}, {{3}, {9, 20}, {15, 7}}}, // Test Case 1
-        {{1}, {{1}}}, // Test Case 2 (single-node tree)
-        {{}, {}}, // Test Case 3 (empty tree)
-        {{1, 2, 3, 4, 5, 6, 7}, {{1}, {2, 3}, {4, 5, 6, 7}}} // Test Case 4 (complete binary tree)
-    };
-
-    for (size_t i = 0; i < testCases.size(); ++i)
+    // Test Case 1: Simple binary tree
+    vector<int> values1 = {1, 2, 3, -1, 5, -1, 4};
+    TreeNode* root1 = createTree(values1);
+    vector<int> result1 = s.rightSideView(root1);
+    cout << "Right Side View (Test Case 1): ";
+    for (int val : result1)
     {
-        const auto& [treeValues, expected] = testCases[i];
-
-        TreeNode* root = createTree(treeValues);
-        vector<vector<int>> output = s.levelOrder(root);
-
-        cout << "Test Case " << i + 1 << ":\n";
-        cout << "Input Tree: ";
-        for (int val : treeValues) cout << val << " ";
-        cout << "\nExpected Output: ";
-        for (const auto& level : expected)
-        {
-            cout << "[";
-            for (int val : level)
-                cout << val << " ";
-            cout << "]";
-        }
-        cout << "\nActual Output: ";
-        for (const auto& level : output)
-        {
-            cout << "[";
-            for (int val : level)
-                cout << val << " ";
-            cout << "]";
-        }
-        cout << "\n\n";
-
-        // Clean up dynamically allocated tree
-        delete root;
+        cout << val << " ";
     }
+    cout << endl;
 
+    // Test Case 2: Binary tree with only root node
+    vector<int> values2 = {1};
+    TreeNode* root2 = createTree(values2);
+    vector<int> result2 = s.rightSideView(root2);
+    cout << "Right Side View (Test Case 2): ";
+    for (int val : result2)
+    {
+        cout << val << " ";
+    }
+    cout << endl;
+
+    // Test Case 3: Empty binary tree
+    vector<int> values3 = {};
+    TreeNode* root3 = createTree(values3);
+    vector<int> result3 = s.rightSideView(root3);
+    cout << "Right Side View (Test Case 3): ";
+    for (int val : result3)
+    {
+        cout << val << " ";
+    }
+    cout << endl;
+
+    // Test Case 4: Left-skewed binary tree
+    vector<int> values4 = {1, 2, -1, 3, -1, -1, -1};
+    TreeNode* root4 = createTree(values4);
+    vector<int> result4 = s.rightSideView(root4);
+    cout << "Right Side View (Test Case 4): ";
+    for (int val : result4)
+    {
+        cout << val << " ";
+    }
+    cout << endl;
+
+    // Test Case 5: Right-skewed binary tree
+    vector<int> values5 = {1, -1, 2, -1, -1, -1, 3};
+    TreeNode* root5 = createTree(values5);
+    vector<int> result5 = s.rightSideView(root5);
+    cout << "Right Side View (Test Case 5): ";
+    for (int val : result5)
+    {
+        cout << val << " ";
+    }
+    cout << endl;
 
     return 0;
 }

@@ -28,49 +28,36 @@ struct TreeNode
 
 class Solution {
 public:
-    vector<int> rightSideView(TreeNode* root) {
-        vector<int> res;
+    //We can do a postorder DFS. This way we compute the children, and compare to parents.
+    //
+    int goodNodes(TreeNode* root)
+    {
+
+        int res = dfs(root, INT_MIN);
+
+        return res;
+    }
+
+
+    int dfs(TreeNode* root, int path_max)
+    {
 
         if (!root)
         {
-            return res;
+            return 0;
         }
 
-        queue<TreeNode*> q;
-        q.push(root);
-        TreeNode* node;
+        int left = dfs(root->left, max(path_max, root->val));
+        int right = dfs(root->right, max(path_max, root->val));
 
 
-        while (!q.empty())
+        if (root->val >= path_max)
         {
-
-            int size = q.size();
-
-            for (int i = 0; i < size; i++)
-            {
-                node = q.front();
-                q.pop();
-
-                if (node->left)
-                {
-                    q.push(node->left);
-                }
-
-                if (node->right)
-                {
-                    q.push(node->right);
-                }
-
-                if (i == size-1)
-                {
-                    res.push_back(node->val);
-                }
-
-            }
-
+            return left + right + 1;
         }
+        return left + right;
 
-        return res;
+
     }
 };
 
@@ -97,60 +84,64 @@ int main()
     Solution s;
 
 
-    // Test Case 1: Simple binary tree
-    vector<int> values1 = {1, 2, 3, -1, 5, -1, 4};
-    TreeNode* root1 = createTree(values1);
-    vector<int> result1 = s.rightSideView(root1);
-    cout << "Right Side View (Test Case 1): ";
-    for (int val : result1)
+    // Test case 1: Single node tree
     {
-        cout << val << " ";
+        TreeNode* root = createTree({3});
+        int actual = s.goodNodes(root);
+        int expected = 1;
+        cout << "Test case 1: " << (actual == expected ? "Passed" : "Failed")
+            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
+        delete root;
     }
-    cout << endl;
 
-    // Test Case 2: Binary tree with only root node
-    vector<int> values2 = {1};
-    TreeNode* root2 = createTree(values2);
-    vector<int> result2 = s.rightSideView(root2);
-    cout << "Right Side View (Test Case 2): ";
-    for (int val : result2)
+    // Test case 2: All nodes are good nodes (strictly increasing values in path)
     {
-        cout << val << " ";
+        TreeNode* root = createTree({3, 2, 4, 1, -1, 5});
+        int actual = s.goodNodes(root);
+        int expected = 3;
+        cout << "Test case 2: " << (actual == expected ? "Passed" : "Failed")
+            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
+        delete root;
     }
-    cout << endl;
 
-    // Test Case 3: Empty binary tree
-    vector<int> values3 = {};
-    TreeNode* root3 = createTree(values3);
-    vector<int> result3 = s.rightSideView(root3);
-    cout << "Right Side View (Test Case 3): ";
-    for (int val : result3)
+    // Test case 3: Only root is a good node
     {
-        cout << val << " ";
+        TreeNode* root = createTree({3, 2, 1});
+        int actual = s.goodNodes(root);
+        int expected = 1;
+        cout << "Test case 3: " << (actual == expected ? "Passed" : "Failed")
+            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
+        delete root;
     }
-    cout << endl;
 
-    // Test Case 4: Left-skewed binary tree
-    vector<int> values4 = {1, 2, -1, 3, -1, -1, -1};
-    TreeNode* root4 = createTree(values4);
-    vector<int> result4 = s.rightSideView(root4);
-    cout << "Right Side View (Test Case 4): ";
-    for (int val : result4)
+    // Test case 4: All nodes are bad except the root
     {
-        cout << val << " ";
+        TreeNode* root = createTree({3, 1, 1, 0});
+        int actual = s.goodNodes(root);
+        int expected = 1;
+        cout << "Test case 4: " << (actual == expected ? "Passed" : "Failed")
+            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
+        delete root;
     }
-    cout << endl;
 
-    // Test Case 5: Right-skewed binary tree
-    vector<int> values5 = {1, -1, 2, -1, -1, -1, 3};
-    TreeNode* root5 = createTree(values5);
-    vector<int> result5 = s.rightSideView(root5);
-    cout << "Right Side View (Test Case 5): ";
-    for (int val : result5)
+    // Test case 5: Mixed case
     {
-        cout << val << " ";
+        TreeNode* root = createTree({3, 3, 4, 2, 1, 5});
+        int actual = s.goodNodes(root);
+        int expected = 3;
+        cout << "Test case 5: " << (actual == expected ? "Passed" : "Failed")
+            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
+        delete root;
     }
-    cout << endl;
+
+    // Test case 6: Empty tree
+    {
+        TreeNode* root = nullptr;
+        int actual = s.goodNodes(root);
+        int expected = 0;
+        cout << "Test case 6: " << (actual == expected ? "Passed" : "Failed")
+            << " (Actual: " << actual << ", Expected: " << expected << ")" << endl;
+    }
 
     return 0;
 }

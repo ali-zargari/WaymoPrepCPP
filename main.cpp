@@ -1,11 +1,9 @@
 #include <iostream>
-#include <queue>
-#include <stack>
-#include <string>
 #include <vector>
 
 
 using namespace std;
+
 
 struct TreeNode
 {
@@ -29,36 +27,35 @@ struct TreeNode
 
 class Solution {
 public:
-    // we can do an in-order traversal
-    int kthSmallest(TreeNode* root, int k) {
+    bool isValidBST(TreeNode* root) {
+
         vector<int> res;
-        return dfs(root, res, k);
-        //return res[k];
+
+        return dfs(root, res);
     }
 
-    int dfs(TreeNode* root, vector<int>& res, int k)
+    bool dfs(TreeNode* root, vector<int>& res)
     {
         if (!root)
         {
-            return 0;
+            return true;
         }
 
-        int val = dfs(root->left, res, k);
-
-        if (val)
+        if (!dfs(root->left, res))
         {
-            return val;
+            return false;
         }
 
         res.push_back(root->val);
 
-        if (res.size() == k)
-            return res.back();
+        if (res.size() >= 2 && res[res.size()-1] <= res[res.size()-2])
+        {
+            return false;
+        }
 
-        return dfs(root->right, res, k);
+        return dfs(root->right, res);
     }
 };
-
 
 
 // Helper function to create a binary tree
@@ -82,23 +79,38 @@ int main()
     Solution s;
 
 
-    // Test cases for the kthSmallest function
-    vector<int> treeValues = {3, 1, 4, -1, 2}; // -1 represents null nodes
-    TreeNode* root = createTree(treeValues);
+    // Test case: Valid Binary Search Tree
+    vector<int> values1 = {2, 1, 3}; // A valid BST
+    TreeNode* root1 = createTree(values1);
+    bool result1 = s.isValidBST(root1);
+    cout << "Test Case 1 - Is Valid BST: " << (result1 ? "True" : "False") << " (Expected: True)" << endl;
+    cout << "Tree 1 Structure:" << endl;
+    cout << "    2" << endl;
+    cout << "   / \\" << endl;
+    cout << "  1   3" << endl;
 
-    int k = 1; // Example input to find the 1st smallest
-    cout << "Test 1 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 1)" << endl;
+    /*// Test case: Invalid Binary Search Tree
+    vector<int> values2 = {5, 1, 4, -1, -1, 3, 6}; // An invalid BST
+    TreeNode* root2 = createTree(values2);
+    bool result2 = s.isValidBST(root2);
+    cout << "Test Case 2 - Is Valid BST: " << (result2 ? "True" : "False") << " (Expected: False)" << endl;
+    cout << "Tree 2 Structure:" << endl;
+    cout << "        5" << endl;
+    cout << "       / \\" << endl;
+    cout << "      1   4" << endl;
+    cout << "         / \\" << endl;
+    cout << "        3   6" << endl;
 
-    k = 2; // Example to find the 2nd smallest
-    cout << "Test 2 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 2)" << endl;
+    // Test case: Empty tree
+    TreeNode* root3 = nullptr; // An empty tree
+    bool result3 = s.isValidBST(root3);
+    cout << "Test Case 3 - Is Valid BST: " << (result3 ? "True" : "False") << " (Expected: True)" << endl;
+    cout << "Tree 3 Structure: Empty Tree" << endl;
 
-    k = 3; // Example to find the 3rd smallest
-    cout << "Test 3 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 3)" << endl;
+    // Cleaning up allocated memory
+    delete root1;
+    delete root2;
+    // No need to delete root3 as it's nullptr*/
 
-    k = 4; // Example to find the 4th smallest
-    cout << "Test 4 - k = " << k << ": " << s.kthSmallest(root, k) << " (Expected: 4)" << endl;
-
-    // Don't forget to free the allocated memory after tests
-    
     return 0;
 }

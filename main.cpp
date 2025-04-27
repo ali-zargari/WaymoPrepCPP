@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -5,92 +6,107 @@
 
 using namespace std;
 
-
-
 class Solution {
 public:
-    int lastStoneWeight(vector<int>& stones) {
+    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+        // we want the k closest point to origin. We can keep the distances in a max heap.
+        // Then we just return the kth smallest.
 
-        priority_queue<int> max_heap;
-        int res = 0;
 
-        if (stones.size() == 1)
+        priority_queue<pair<float, int>> dist_heap;
+        vector<vector<int>> res;
+
+        int i = 0;
+        for (vector <int> point: points)
         {
-            return stones[0];
-        }
+            int x = point[0];
+            int y = point[1];
 
-        if (stones.size() == 0)
-        {
-            return 0;
-        }
+            auto dist = static_cast<float>(sqrt((x * x) + (y * y)));
 
-        for (int s: stones)
-        {
-            max_heap.push(s);
-        }
+            dist_heap.emplace(dist, i);
+            i++;
 
-
-        // we can use a max heap. We save top in a variable. then pop. Then we have the second highest to compare with.
-
-
-        while (max_heap.size() >= 2)
-        {
-
-            int first = max_heap.top();
-            max_heap.pop();
-
-            int second = max_heap.top();
-            max_heap.pop();
-
-            res = first - second;
-            
-            if (res != 0)
+            if (dist_heap.size() > k)
             {
-                max_heap.push(res);
-            }
-
-            if (max_heap.size() == 1)
-            {
-                return max_heap.top();
+                dist_heap.pop();
             }
         }
+
+
+        while(!dist_heap.empty())
+        {
+            res.emplace_back(vector<int>(points[dist_heap.top().second]));
+            dist_heap.pop();
+        }
+
 
         return res;
+
     }
 };
+
 
 
 
 // Main function provided by user - unchanged.
 int main()
 {
-    // Test cases for KthLargest
+    Solution sol;
+    // Test case #1
+    vector<vector<int>> points1 = {{1, 3}, {-2, 2}};
+    int k1 = 1;
+    vector<vector<int>> result1 = sol.kClosest(points1, k1);
+    cout << "Test case #1 - Expected: [[-2,2]], Actual: ";
+    for (auto& point : result1)
+    {
+        cout << "[" << point[0] << "," << point[1] << "] ";
+    }
+    cout << endl;
 
+    // Test case #2
+    vector<vector<int>> points2 = {{3, 3}, {5, -1}, {-2, 4}};
+    int k2 = 2;
+    vector<vector<int>> result2 = sol.kClosest(points2, k2);
+    cout << "Test case #2 - Expected: [[3,3],[-2,4]], Actual: ";
+    for (auto& point : result2)
+    {
+        cout << "[" << point[0] << "," << point[1] << "] ";
+    }
+    cout << endl;
 
-    Solution solution;
-    // Test case 1: General case with multiple stones
-    vector<int> stones1 = {2, 7, 4, 1, 8, 1};
-    // first = 8, second 7. {2, 4, 1, 1} -> {2, 4, 1, 1, 1}
-    // first = 4, second 2. {1, 1, 1} -> {2, 1, 1, 1}
-    // first = 2, second 1. { 1, 1 } -> {1, 1, 1}
-    // first = 1, second 1. { 1 }
-    cout << "Test case 1: Expected: 1, Actual: " << solution.lastStoneWeight(stones1) << endl;
+    // Test case #3
+    vector<vector<int>> points3 = {{0, 1}, {1, 0}, {0, 2}, {2, 0}, {-1, -1}};
+    int k3 = 3;
+    vector<vector<int>> result3 = sol.kClosest(points3, k3);
+    cout << "Test case #3 - Expected: [[0,1],[1,0],[-1,-1]], Actual: ";
+    for (auto& point : result3)
+    {
+        cout << "[" << point[0] << "," << point[1] << "] ";
+    }
+    cout << endl;
 
-    // Test case 2: Single stone
-    vector<int> stones2 = {5};
-    cout << "Test case 2: Expected: 5, Actual: " << solution.lastStoneWeight(stones2) << endl;
+    // Test case #4: No points
+    vector<vector<int>> points4 = {};
+    int k4 = 1;
+    vector<vector<int>> result4 = sol.kClosest(points4, k4);
+    cout << "Test case #4 - Expected: [], Actual: ";
+    for (auto& point : result4)
+    {
+        cout << "[" << point[0] << "," << point[1] << "] ";
+    }
+    cout << endl;
 
-    // Test case 3: No stones
-    vector<int> stones3 = {};
-    cout << "Test case 3: Expected: 0, Actual: " << solution.lastStoneWeight(stones3) << endl;
-
-    // Test case 4: Equal stones - all will cancel out
-    vector<int> stones4 = {4, 4, 4, 4};
-    cout << "Test case 4: Expected: 0, Actual: " << solution.lastStoneWeight(stones4) << endl;
-
-    // Test case 5: Large stones that leave a residue
-    vector<int> stones5 = {10, 4, 9, 2};
-    cout << "Test case 5: Expected: 1, Actual: " << solution.lastStoneWeight(stones5) << endl;
+    // Test case #5: All points returned
+    vector<vector<int>> points5 = {{2, 2}, {3, 3}};
+    int k5 = 2;
+    vector<vector<int>> result5 = sol.kClosest(points5, k5);
+    cout << "Test case #5 - Expected: [[2,2],[3,3]], Actual: ";
+    for (auto& point : result5)
+    {
+        cout << "[" << point[0] << "," << point[1] << "] ";
+    }
+    cout << endl;
 
     return 0;
 }

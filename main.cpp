@@ -7,40 +7,55 @@ using namespace std;
 
 
 
-class KthLargest {
-private:
-    priority_queue<int, vector<int>, greater<int>> minheap;
-    int k;
-
+class Solution {
 public:
+    int lastStoneWeight(vector<int>& stones) {
 
-    KthLargest(int k, vector<int>& nums) {
+        priority_queue<int> max_heap;
+        int res = 0;
 
-        this->k = k;
-        for (int i = 0; i < nums.size(); i++)
+        if (stones.size() == 1)
         {
-            minheap.push(nums[i]);
-            if (minheap.size() > k)
-            {
-                minheap.pop();
-            }
+            return stones[0];
+        }
+
+        if (stones.size() == 0)
+        {
+            return 0;
+        }
+
+        for (int s: stones)
+        {
+            max_heap.push(s);
         }
 
 
+        // we can use a max heap. We save top in a variable. then pop. Then we have the second highest to compare with.
 
-    }
 
-    int add(int val) {
-        minheap.push(val);
-        for (int i = 0; i < minheap.size(); i++)
+        while (max_heap.size() >= 2)
         {
-            if (minheap.size() > k)
+
+            int first = max_heap.top();
+            max_heap.pop();
+
+            int second = max_heap.top();
+            max_heap.pop();
+
+            res = first - second;
+            
+            if (res != 0)
             {
-                minheap.pop();
+                max_heap.push(res);
+            }
+
+            if (max_heap.size() == 1)
+            {
+                return max_heap.top();
             }
         }
 
-        return minheap.top();
+        return res;
     }
 };
 
@@ -50,18 +65,32 @@ public:
 int main()
 {
     // Test cases for KthLargest
-    vector<int> nums = {4, 5, 8, 2};
-    int k = 3;
 
-    // Step 1: Initialize KthLargest with k and an initial array
-    KthLargest kthLargest(k, nums);
 
-    // Step 2: Test add() function and print kth largest element
-    cout << kthLargest.add(3) << endl; // Expected output: 4
-    cout << kthLargest.add(5) << endl; // Expected output: 5
-    cout << kthLargest.add(10) << endl; // Expected output: 5
-    cout << kthLargest.add(9) << endl; // Expected output: 8
-    cout << kthLargest.add(4) << endl; // Expected output: 8
+    Solution solution;
+    // Test case 1: General case with multiple stones
+    vector<int> stones1 = {2, 7, 4, 1, 8, 1};
+    // first = 8, second 7. {2, 4, 1, 1} -> {2, 4, 1, 1, 1}
+    // first = 4, second 2. {1, 1, 1} -> {2, 1, 1, 1}
+    // first = 2, second 1. { 1, 1 } -> {1, 1, 1}
+    // first = 1, second 1. { 1 }
+    cout << "Test case 1: Expected: 1, Actual: " << solution.lastStoneWeight(stones1) << endl;
+
+    // Test case 2: Single stone
+    vector<int> stones2 = {5};
+    cout << "Test case 2: Expected: 5, Actual: " << solution.lastStoneWeight(stones2) << endl;
+
+    // Test case 3: No stones
+    vector<int> stones3 = {};
+    cout << "Test case 3: Expected: 0, Actual: " << solution.lastStoneWeight(stones3) << endl;
+
+    // Test case 4: Equal stones - all will cancel out
+    vector<int> stones4 = {4, 4, 4, 4};
+    cout << "Test case 4: Expected: 0, Actual: " << solution.lastStoneWeight(stones4) << endl;
+
+    // Test case 5: Large stones that leave a residue
+    vector<int> stones5 = {10, 4, 9, 2};
+    cout << "Test case 5: Expected: 1, Actual: " << solution.lastStoneWeight(stones5) << endl;
 
     return 0;
 }

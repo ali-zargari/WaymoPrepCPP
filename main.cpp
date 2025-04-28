@@ -1,6 +1,10 @@
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <queue>
+#include <set>
+#include <unordered_map>
+
 #include <vector>
 
 
@@ -8,105 +12,97 @@ using namespace std;
 
 class Solution {
 public:
-    vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
-        // we want the k closest point to origin. We can keep the distances in a max heap.
-        // Then we just return the kth smallest.
+    int leastInterval(vector<char>& tasks, int n) {
+        //We can go through the tasks. We process the first one. We keep going through the list. If the next is equal,
+        //we remove it (maybe add it to a waiting queue). Then continue, and check waiting queue. If one is ready,
+        //then we pop from queue, and process.
 
 
-        priority_queue<pair<float, int>> dist_heap;
-        vector<vector<int>> res;
+        vector<int> count(26, 0);
 
-        int i = 0;
-        for (vector <int> point: points)
+        for (const char i: tasks)
         {
-            int x = point[0];
-            int y = point[1];
+            count[i-'A']++;
+        }
 
-            auto dist = static_cast<float>(sqrt((x * x) + (y * y)));
-
-            dist_heap.emplace(dist, i);
-            i++;
-
-            if (dist_heap.size() > k)
+        priority_queue<int> task_list;
+        for (int i : count)
+        {
+            if (i != 0)
             {
-                dist_heap.pop();
+                task_list.push(i);
             }
         }
 
+        int time = 0;
+        queue<pair<int, int>> waiting;
 
-        while(!dist_heap.empty())
+        while (!waiting.empty() || !task_list.empty())
         {
-            res.emplace_back(vector<int>(points[dist_heap.top().second]));
-            dist_heap.pop();
+
+            if (!waiting.empty() && waiting.front().second <= time)
+            {
+                task_list.push(waiting.front().first);
+                waiting.pop();
+            }
+
+            if (!task_list.empty())
+            {
+                int temp = task_list.top();
+                task_list.pop();
+                if (temp - 1 > 0)
+                {
+                    waiting.emplace(temp - 1, time + n + 1);
+                }
+
+            } else
+            {
+                time = waiting.front().second;
+            }
+
+
+            time++;
         }
 
-
-        return res;
-
+        return time;
     }
+
 };
-
-
 
 
 // Main function provided by user - unchanged.
 int main()
 {
-    Solution sol;
-    // Test case #1
-    vector<vector<int>> points1 = {{1, 3}, {-2, 2}};
-    int k1 = 1;
-    vector<vector<int>> result1 = sol.kClosest(points1, k1);
-    cout << "Test case #1 - Expected: [[-2,2]], Actual: ";
-    for (auto& point : result1)
-    {
-        cout << "[" << point[0] << "," << point[1] << "] ";
-    }
-    cout << endl;
 
-    // Test case #2
-    vector<vector<int>> points2 = {{3, 3}, {5, -1}, {-2, 4}};
-    int k2 = 2;
-    vector<vector<int>> result2 = sol.kClosest(points2, k2);
-    cout << "Test case #2 - Expected: [[3,3],[-2,4]], Actual: ";
-    for (auto& point : result2)
-    {
-        cout << "[" << point[0] << "," << point[1] << "] ";
-    }
-    cout << endl;
 
-    // Test case #3
-    vector<vector<int>> points3 = {{0, 1}, {1, 0}, {0, 2}, {2, 0}, {-1, -1}};
-    int k3 = 3;
-    vector<vector<int>> result3 = sol.kClosest(points3, k3);
-    cout << "Test case #3 - Expected: [[0,1],[1,0],[-1,-1]], Actual: ";
-    for (auto& point : result3)
-    {
-        cout << "[" << point[0] << "," << point[1] << "] ";
-    }
-    cout << endl;
+    Solution s;
 
-    // Test case #4: No points
-    vector<vector<int>> points4 = {};
-    int k4 = 1;
-    vector<vector<int>> result4 = sol.kClosest(points4, k4);
-    cout << "Test case #4 - Expected: [], Actual: ";
-    for (auto& point : result4)
-    {
-        cout << "[" << point[0] << "," << point[1] << "] ";
-    }
-    cout << endl;
+    //s.leastInterval({'A', 'A', 'A', 'B', 'C', 'B'}, 2);
 
-    // Test case #5: All points returned
-    vector<vector<int>> points5 = {{2, 2}, {3, 3}};
-    int k5 = 2;
-    vector<vector<int>> result5 = sol.kClosest(points5, k5);
-    cout << "Test case #5 - Expected: [[2,2],[3,3]], Actual: ";
-    for (auto& point : result5)
-    {
-        cout << "[" << point[0] << "," << point[1] << "] ";
-    }
-    cout << endl;
+
+    vector<char> tasks1 = {'A', 'A', 'A', 'B', 'C', 'B'};
+    int n1 = 2;
+    cout << "Test Case 1: " << s.leastInterval(tasks1, n1) << endl;
+
+    vector<char> tasks2 = {'A', 'A', 'A', 'B', 'B', 'B'};
+    int n2 = 0;
+    cout << "Test Case 2: " << s.leastInterval(tasks2, n2) << endl;
+
+    vector<char> tasks3 = {'A', 'B', 'C', 'A', 'B', 'A'};
+    int n3 = 2;
+    cout << "Test Case 3: " << s.leastInterval(tasks3, n3) << endl;
+
+    vector<char> tasks4 = {'A'};
+    int n4 = 2;
+    cout << "Test Case 4: " << s.leastInterval(tasks4, n4) << endl;
+
+    vector<char> tasks5 = {'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'};
+    int n5 = 3;
+    cout << "Test Case 5: " << s.leastInterval(tasks5, n5) << endl;
+
+    //["A","A","A","B","C","B"], 2
+
+    // A -> B -> C -> A -> B -> -> A
 
     return 0;
 }

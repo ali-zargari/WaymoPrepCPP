@@ -1,224 +1,122 @@
 #include <vector>
-#include <unordered_map>
-#include <queue>
 #include <iostream>
-#include <ctime>
-#include <map>
-#include <set>
 #include <stack>
-#include <unordered_set>
 
 using namespace std;
 
-class Grid {
-private:
-    vector<vector<int>> grid;
-    int row;
-    int col;
+class Solution {
 public:
-    Grid(int m, int n): grid(m, vector<int>(n))
-    {
-        row = m;
-        col = n;
-        fillGrid(m, n);
-    }
+    int numIslands(vector<vector<char>>& grid) {
 
-
-    Grid(const vector<vector<int>>& customGrid)
-    {
-        grid = customGrid;
-        row = grid.size();
-        col = grid[0].size();
-    }
-
-    void fillGrid(int m, int n)
-    {
-        srand(time(nullptr));
-        for (int i = 0; i < m; i++)
+        if (grid.size() == 0)
         {
-            for (int j = 0; j < n; j++)
-            {
-                grid[i][j] = rand() % 2;
-            }
+            return 0;
         }
 
-    }
+        vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
 
-    void displayGrid()
-    {
+        int island_count = 0;
+
+        auto dfs = [&grid, &visited](int x, int y)
+        {
+            visited[x][y] = true;
+            int dir [4][2]  = {{1, 0},{-1, 0},{0, 1},{0, -1}};
+            stack<pair<int, int>> stk;
+            stk.emplace(x, y);
+
+            while (!stk.empty())
+            {
+
+                pair<int, int> node = stk.top();
+                stk.pop();
+
+                for (auto d: dir)
+                {
+                    if ((node.first + d[0] >= 0 && node.first + d[0] < grid.size()) &&
+                        (node.second + d[1] >= 0 && node.second + d[1] < grid[0].size())) {
+
+                        if (!visited[node.first + d[0]][node.second + d[1]] &&
+                            grid[node.first + d[0]][node.second + d[1]] == '1')
+                        {
+                            visited[node.first + d[0]][node.second + d[1]] = true;
+                            stk.emplace(node.first + d[0], node.second + d[1]);
+                        }
+                    }
+                }
+            }
+        };
+
+
         for (int i = 0; i < grid.size(); i++)
         {
             for (int j = 0; j < grid[i].size(); j++)
             {
-                cout << grid[i][j] << " ";
-            }
-            cout << endl;
-        }
-    }
-
-    void displayNeighbors() const {
-        int m = grid.size();
-        int n = m ? grid[0].size() : 0;
-
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                cout << "Cell [" << i << "][" << j << "]:  ";
-                bool first = true;
-
-                // up
-                if (i > 0) {
-                    cout << "up= " << grid[i-1][j];
-                    first = false;
-                }
-                // down
-                if (i + 1 < m) {
-                    if (!first) cout << ", ";
-                    cout << "down= " << grid[i+1][j];
-                    first = false;
-                }
-                // left
-                if (j > 0) {
-                    if (!first) cout << ", ";
-                    cout << "left= " << grid[i][j-1];
-                    first = false;
-                }
-                // right
-                if (j + 1 < n) {
-                    if (!first) cout << ", ";
-                    cout << "right= " << grid[i][j+1];
-                    first = false;
-                }
-
-                if (first) {
-                    cout << "none";
-                }
-                cout << "\n";
-            }
-        }
-    }
-
-    void bfs(pair<int, int> start, pair<int, int> target)
-    {
-        queue<pair<int, int>> q;
-        vector<vector<bool>> visited(row, vector<bool>(col, false));
-        pair<int, int> node = start;
-
-        vector<pair<int, int>> dir = {
-            {1, 0},
-            {-1, 0},
-            {0, 1},
-            {0, -1}
-        };
-
-        q.push(node);
-        visited[start.first][start.second] = true;
-
-        while (!q.empty())
-        {
-            auto current = q.front();
-            q.pop();
-
-            if (current.first == target.first &&
-                current.second == target.second)
-            {
-                cout << "found" << endl;
-                return;
-            }
-
-            for (pair<int, int> d: dir)
-            {
-                if (d.first + current.first < row && d.first + current.first >= 0)
+                //cout << grid[i][j] << " " << boolalpha<< (grid[i][j] == 1 && !visited[i][j]) ;
+                if (grid[i][j] == '1' && !visited[i][j])
                 {
-                    if (d.second + current.second < col && d.second + current.second >= 0)
-                    {
-                        if (!visited[d.first + current.first][d.second + current.second] && grid[d.first + current.first][d.second + current.second] != 0)
-                        {
-                            q.push({d.first + current.first, d.second + current.second});
-                            visited[d.first + current.first][d.second + current.second] = true;
-                        }
-                    }
+                    dfs(i, j);
+                    island_count++;
                 }
             }
+            //cout << endl;
         }
-    }
 
-    void dfs(pair<int, int> start, pair<int, int> target)
-    {
-        stack<pair<int, int>> stk;
-        vector<vector<bool>> visited(row, vector<bool>(col, false));
-        pair<int, int> node = start;
-
-        vector<pair<int, int>> dir = {
-            {1, 0},
-            {-1, 0},
-            {0, 1},
-            {0, -1}
-        };
-
-        stk.push(node);
-        visited[start.first][start.second] = true;
-
-        while (!stk.empty())
-        {
-            auto current = stk.top();
-            stk.pop();
-
-            if (current.first == target.first &&
-                current.second == target.second)
-            {
-                cout << "found" << endl;
-                return;
-            }
-
-            for (pair<int, int> d: dir)
-            {
-                if (d.first + current.first < row && d.first + current.first >= 0)
-                {
-                    if (d.second + current.second < col && d.second + current.second >= 0)
-                    {
-                        if (!visited[d.first + current.first][d.second + current.second] && grid[d.first + current.first][d.second + current.second] != 0)
-                        {
-                            stk.push({d.first + current.first, d.second + current.second});
-                            visited[d.first + current.first][d.second + current.second] = true;
-                        }
-                    }
-                }
-            }
-        }
+        return island_count;
     }
 };
-
 
 
 // To execute C++, please define "int main()"
 int main() {
 
-
-    //A, A, A, B, C, B
-    //Grid g = Grid(20, 20);
-    //g.displayGrid();
-    //g.displayNeighbors();
+    Solution s;
 
 
-    //
-
-
-    // Create a custom grid
-    vector<vector<int>> customGrid = {
-        {1, 0, 1, 0},
-        {1, 1, 0, 1},
-        {0, 1, 1, 1},
-        {1, 0, 1, 0}
+    // Test case 1: Basic 4x5 grid with 2 islands
+    vector<vector<char>> grid1 = {
+        {'1', '1', '0', '0', '0'},
+        {'1', '1', '0', '0', '0'},
+        {'0', '0', '1', '0', '0'},
+        {'0', '0', '0', '1', '1'}
     };
+    cout << "Number of islands in grid1: " << s.numIslands(grid1) << endl; // Expected: 3
 
+    // Test case 2: Grid with no land ('1')
+    vector<vector<char>> grid2 = {
+        {'0', '0', '0', '0', '0'},
+        {'0', '0', '0', '0', '0'},
+        {'0', '0', '0', '0', '0'}
+    };
+    cout << "Number of islands in grid2: " << s.numIslands(grid2) << endl; // Expected: 0
 
-    // Initialize a new Grid instance with the custom grid
-    Grid customGridInstance(customGrid);
-    cout << "Custom Grid:" << endl;
-    customGridInstance.displayGrid();
+    // Test case 3: Grid with all land ('1')
+    vector<vector<char>> grid3 = {
+        {'1', '1', '1'},
+        {'1', '1', '1'},
+        {'1', '1', '1'}
+    };
+    cout << "Number of islands in grid3: " << s.numIslands(grid3) << endl; // Expected: 1
 
+    // Test case 4: Grid with one vertical island
+    vector<vector<char>> grid4 = {
+        {'1', '0', '0'},
+        {'1', '0', '0'},
+        {'1', '0', '0'}
+    };
+    cout << "Number of islands in grid4: " << s.numIslands(grid4) << endl; // Expected: 1
 
-    customGridInstance.dfs({0, 0}, {3, 2});
+    // Test case 5: Grid with one horizontal island
+    vector<vector<char>> grid5 = {
+        {'0', '0', '0', '0'},
+        {'1', '1', '1', '1'},
+        {'0', '0', '0', '0'}
+    };
+    cout << "Number of islands in grid5: " << s.numIslands(grid5) << endl; // Expected: 1
+
+    // Test case 6: Empty grid (edge case)
+    vector<vector<char>> grid6 = {};
+    cout << "Number of islands in grid6: " << s.numIslands(grid6) << endl; // Expected: 0 (if handled)
+
 
     return 0;
 }

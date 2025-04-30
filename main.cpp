@@ -1,126 +1,100 @@
-#include <vector>
+#include <algorithm>
 #include <iostream>
-#include <stack>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+
 
 using namespace std;
 
 class Solution {
 public:
-    int maxAreaOfIsland(vector<vector<int>>& grid) {
+  vector<pair<int, int>> shortestPath(vector<vector<int>> grid, pair<int, int> start, pair<int, int> target) {
+
+    vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
+    vector<pair<int, int>> result;
 
 
-        if (grid.size() == 0)
-        {
-            return 0;
+    auto bfs = [&](int y, int x){
+
+      auto key = [&](int r,int c){
+        return (static_cast<long long>(r) << 32) | unsigned(c);
+      };
+
+      // parent map: child_key -> parent (r,c)
+      unordered_map<long long, pair<int,int>> parent;
+      parent[key(y,x)] = {-1,-1};  // root has no parent
+
+      vector<pair<int, int>> dir = {{1, 0},{-1, 0},{0, 1},{0, -1}};
+      visited[y][x] = true;
+
+      queue<pair<int, int>> q;
+      q.push({y, x});
+
+
+      while(!q.empty()){
+        pair<int, int> node = q.front();
+        q.pop();
+
+
+        if(node.first == target.first && node.second == target.second){
+          vector<pair<int,int>> path;
+          for(auto cur = node; cur.first != -1; cur = parent[key(cur.first,cur.second)])
+            path.push_back(cur);
+          reverse(path.begin(), path.end());
+          result = path;
+          return;
         }
 
+        for(pair d:dir){
+          if(node.first + d.first < (int) visited.size() &&
+             node.first + d.first >= 0){
 
-        int area = 0;
-        vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
+            if(node.second + d.second <(int) visited[0].size() &&
+               node.second + d.second >= 0){
 
+              if(!visited[node.first+d.first][node.second+d.second] &&
+                     grid[node.first+d.first][node.second+d.second] != 1){
 
-        auto dfs = [&](int x, int y)
-        {
-            int temp_area = 1;
-            int dir[4][2] = {{1, 0},{-1, 0},{0, 1},{0, -1}};
-            stack<pair<int, int>> stk;
+                visited[node.first+d.first][node.second+d.second] = true;
+                q.push({node.first+d.first, node.second+d.second});
+                parent[key(node.first+d.first, node.second+d.second)] = node;
 
-            stk.emplace(x, y);
-
-            visited[x][y] = true;
-
-            while (!stk.empty())
-            {
-
-                pair <int, int> node = stk.top();
-                stk.pop();
-
-                for (int* d :dir)
-                {
-                    if ((node.first + d[0] < grid.size() && node.first + d[0] >= 0) &&
-                        (node.second + d[1] < grid[0].size() && node.second + d[1] >= 0) &&
-                        !visited[node.first + d[0]][node.second + d[1]] &&
-                        grid[node.first + d[0]][node.second + d[1]] == 1)
-                    {
-                        stk.emplace(node.first + d[0], node.second + d[1]);
-                        temp_area += 1;
-                        visited[node.first + d[0]][node.second + d[1]] = true;
-                    }
-                }
+              }
             }
-
-            area = max(area, temp_area);
-        };
-
-
-        for (int i = 0; i < grid.size(); i++)
-        {
-            for (int j = 0; j < grid[i].size(); j++)
-            {
-                if (grid[i][j] == 1 && !visited[i][j])
-                {
-                    dfs(i, j);
-                }
-            }
+          }
         }
+      }
 
-        return area;
+
+    };
+
+
+    for(int i = start.first; i < (int) grid.size(); i++){
+      for(int j = start.second; j < (int) grid[i].size();j++){
+        if(grid[i][j] != 1 && !visited[i][j])
+          bfs(i, j);
+      }
     }
+
+    return result;
+  }
+
+
 };
 
+int main(){
 
+  Solution s;
+  vector<vector<int>> grid = {{0, 1, 0, 1, 0},
+                              {0, 1, 0, 0, 0},
+                              {0, 1, 0, 1, 0},
+                              {0, 0, 0, 1, 0},
+                              {0, 0, 0, 0, 0}};
 
-// To execute C++, please define "int main()"
-int main() {
+  for(auto p: s.shortestPath(grid, {0, 0}, {0, 2})){
+    cout << p.first << "," << p.second << " ";
+  }
 
-    Solution s;
-
-
-    // Test case 1: Basic 4x5 grid with 2 islands
-    vector<vector<int>> grid1 = {
-        {1, 1, 0, 0, 0},
-        {1, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0},
-        {0, 0, 0, 1, 1}
-    };
-    cout << "Expected: 4, Actual: " << s.maxAreaOfIsland(grid1) << endl;
-
-    // Test case 2: Grid with no land ('1')
-    vector<vector<int>> grid2 = {
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0}
-    };
-    cout << "Expected: 0, Actual: " << s.maxAreaOfIsland(grid2) << endl;
-
-    // Test case 3: Grid with all land ('1')
-    vector<vector<int>> grid3 = {
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1}
-    };
-    cout << "Expected: 9, Actual: " << s.maxAreaOfIsland(grid3) << endl;
-
-    // Test case 4: Grid with one vertical island
-    vector<vector<int>> grid4 = {
-        {1, 0, 0},
-        {1, 0, 0},
-        {1, 0, 0}
-    };
-    cout << "Expected: 3, Actual: " << s.maxAreaOfIsland(grid4) << endl;
-
-    // Test case 5: Grid with one horizontal island
-    vector<vector<int>> grid5 = {
-        {0, 0, 0, 0},
-        {1, 1, 1, 1},
-        {0, 0, 0, 0}
-    };
-    cout << "Expected: 4, Actual: " << s.maxAreaOfIsland(grid5) << endl;
-
-    // Test case 6: Empty grid (edge case)
-    vector<vector<int>> grid6 = {};
-    cout << "Expected: 0, Actual: " << s.maxAreaOfIsland(grid6) << endl;
-
-
-    return 0;
+  return 0;
 }

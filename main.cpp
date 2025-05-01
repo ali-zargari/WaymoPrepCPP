@@ -1,60 +1,47 @@
-#include <limits.h>
-#include <map>
-#include <queue>
-#include <set>
+#include <climits>
+#include <cmath>
 #include <iostream>
 
 
 using namespace std;
 
-class HitCounter
+class Solution
 {
 public:
 
-    vector<pair<int, int>> timeline;
-    int count;
+    long long MOD = 1000000007;
 
-    HitCounter()
-    {
-        count = 0;
-        //first = timestamp
-        // second = count
-        timeline = vector<pair<int, int>>(300, {0, 0});
-    }
-
-    void hit(int timeStamp)
-    {
-        int index = timeStamp % 300;
-
-        if (timeline[index].first == timeStamp)
-        {
-            timeline[index].second++;
-        } else
-        {
-            timeline[index].first = timeStamp;
-            timeline[index].second = 1;
-        }
-
-    }
-
-    int getHits(int timeStamp)
-    {
-        int total = 0;
-
-        for (int i = 0; i < 300; i++)
-        {
-            pair<int, int> bucket = timeline[i];
-
-            if (timeStamp - bucket.first < 300)
-            {
-                total += bucket.second;
+    long long power(long long base, long long exp) {
+        long long res = 1;
+        base %= MOD; // Make sure base is within modulo range initially
+        while (exp > 0) {
+            // If exponent is odd, multiply result with base
+            if (exp % 2 == 1) {
+                res = (res * base) % MOD;
             }
+            // Square the base and halve the exponent (integer division)
+            base = (base * base) % MOD;
+            exp /= 2;
         }
-
-        return total;
+        return res;
     }
 
+    int countGoodNumbers(long long n) {
+        // Calculate the number of even and odd positioned indices
+        long long num_even_indices = (n + 1) / 2;
+        long long num_odd_indices = n / 2;
 
+        // Calculate 5^(num_even_indices) % MOD
+        long long count_even = power(5, num_even_indices);
+
+        // Calculate 4^(num_odd_indices) % MOD
+        long long count_odd = power(4, num_odd_indices);
+
+        // Multiply the results and take modulo
+        long long total = (count_even * count_odd) % MOD;
+
+        return (int)total; // Cast to int if the function signature requires it
+    }
 };
 
 // hit(1) adds hit to timestamp 1
@@ -66,32 +53,26 @@ public:
 // --- Main function with test cases (modified slightly for clarity) ---
 int main()
 {
-    HitCounter counter;
+    Solution solution;
+long long test1 = 1;
+    long long test2 = 2;
+    long long test3 = 3;
+    long long test4 = 4;
+    long long test5 = 5;
+    long long test6 = 6;
+    long long test7 = 7;
+    long long test8 = 8;
+    long long test9 = 50;
 
-// hit at timestamp 1.
-    counter.hit(1);
+    cout << "Test 1 (n=1): " << solution.power(2, 100000) << endl;
+    cout << "Test 2 (n=2): " << solution.countGoodNumbers(test2) << endl;
+    cout << "Test 3 (n=3): " << solution.countGoodNumbers(test3) << endl;
+    cout << "Test 4 (n=4): " << solution.countGoodNumbers(test4) << endl;
+    cout << "Test 5 (n=5): " << solution.countGoodNumbers(test5) << endl;
+    cout << "Test 6 (n=6): " << solution.countGoodNumbers(test6) << endl;
+    cout << "Test 7 (n=7): " << solution.countGoodNumbers(test7) << endl;
+    cout << "Test 8 (n=8): " << solution.countGoodNumbers(test8) << endl;
+    cout << "Test 9 (n=9): " << solution.countGoodNumbers(test9) << endl;
 
-    // hit at timestamp 2.
-    counter.hit(2);
-
-    // hit at timestamp 3.
-    counter.hit(3);
-
-    // get hits at timestamp 4, should return 3.
-    cout << counter.getHits(4) << endl;
-
-    // hit at timestamp 300.
-    counter.hit(300);
-
-    counter.hit(600);
-
-    // get hits at timestamp 300, should return 4.
-    cout << counter.getHits(300) << endl;
-
-    // get hits at timestamp 301, should return 3.
-    //cout << counter.getHits(900) << endl;
-
-    // get hits at timestamp 301, should return 3.
-    cout << counter.getHits(2) << endl;
     return 0;
 }

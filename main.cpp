@@ -89,6 +89,9 @@ int main()
     cout << counter.getHits(300) << endl;
 
     // get hits at timestamp 301, should return 3.
-    cout << counter.getHits(900) << endl;
+    //cout << counter.getHits(900) << endl;
+
+    // get hits at timestamp 301, should return 3.
+    cout << counter.getHits(2) << endl;
     return 0;
 }

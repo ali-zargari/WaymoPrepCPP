@@ -17,6 +17,8 @@ public:
     HitCounter()
     {
         count = 0;
+        //first = timestamp
+        // second = count
         timeline = vector<pair<int, int>>(300, {0, 0});
     }
 
@@ -81,10 +83,12 @@ int main()
     // hit at timestamp 300.
     counter.hit(300);
 
+    counter.hit(600);
+
     // get hits at timestamp 300, should return 4.
     cout << counter.getHits(300) << endl;
 
     // get hits at timestamp 301, should return 3.
-    cout << counter.getHits(301) << endl;
+    cout << counter.getHits(900) << endl;
     return 0;
 }

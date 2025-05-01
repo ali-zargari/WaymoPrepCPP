@@ -1,7 +1,10 @@
 #include <algorithm>
 #include <iostream>
-#include <vector>
+#include <map>
 #include <queue>
+#include <stack>
+#include <vector>
+#include <unordered_set>
 #include <unordered_map>
 
 
@@ -10,226 +13,105 @@ using namespace std;
 class Solution
 {
 public:
-    //
-    //centroid approach
-    vector<pair<int, int>> shortestPathCentroid(vector<vector<int>> grid)
+    vector<int> canFinish(int numCourses, vector<vector<int>>& prerequisites)
     {
-        vector<pair<int, int>> spots;
+        unordered_map<int, vector<int>> classes;
+        map<int, int> indegree;
+        vector<int> order;
 
-
-        auto bfs = [&](int row, int col, pair<int, int> target)
+        for (int i = 0; i < prerequisites.size(); i++)
         {
-            vector<pair<int, int>> dir = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-            vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
-            vector<vector<pair<int, int>>> parents(grid.size(), vector<pair<int, int>>(grid[0].size(), {-1, -1}));
-            queue<pair<int, int>> q;
-            int distance = INT_MAX;
-            pair<int, int> closest;
+            classes[prerequisites[i][1]].push_back(prerequisites[i][0]);
+            indegree[prerequisites[i][0]]++;
+        }
 
-
-            visited[row][col] = true;
-            q.push({row, col});
-
-            while (!q.empty())
+        for (int i = 0; i < numCourses; i++)
+        {
+            if (!indegree.count(i))
             {
-                pair<int, int> node = q.front();
-                q.pop();
+                indegree[i] = 0;
+            }
+        }
 
-                if (distance > abs(target.first - node.first) + abs(target.second - node.second))
+        queue<int> q;
+        for (auto &[k, v] : indegree)
+        {
+            if (v == 0)
+            {
+                q.push(k);
+                //order.push_back(k);
+            }
+        }
+
+
+        int numcourses = 0;
+
+        while (!q.empty())
+        {
+            int curr = q.front();
+            numcourses++;
+            q.pop();
+            //indegree[curr]--;
+
+            order.push_back(curr);
+
+
+            for (auto c : classes[curr])
+            {
+                if (--indegree[c] == 0)
                 {
-                    distance = abs(target.first - node.first) + abs(target.second - node.second);
-                    closest = node;
-                }
-
-                for (auto d : dir)
-                {
-                    int nr = d.first + node.first;
-                    int nc = d.second + node.second;
-
-                    if (nr < grid.size() && nr >= 0 &&
-                        nc < grid[node.first].size() && nc >= 0)
-                    {
-                        if (!visited[nr][nc] && grid[nr][nc] != 1 && grid[nr][nc] != 2)
-                        {
-                            q.push({nr, nc});
-                            visited[nr][nc] = true;
-                            parents[nr][nc] = node;
-                        }
-                    }
-                }
-            }
-
-            spots.emplace_back(closest);
-        };
-
-        int sum_x = 0;
-        int sum_y = 0;
-        int count = 0;
-        vector<pair<int, int>> starts;
-
-        for (int i = 0; i < grid.size(); i++)
-        {
-            for (int j = 0; j < grid[i].size(); j++)
-            {
-                if (grid[i][j] == 2)
-                {
-                    sum_x += i;
-                    sum_y += j;
-                    count++;
-                    starts.emplace_back(i, j);
+                    q.push(c);
                 }
             }
         }
 
-        for (auto start : starts)
-        {
-            bfs(start.first, start.second, {sum_x / count, sum_y / count});
-        }
-
-        return spots;
-    }
-
-
-    pair<int, int> shortestPath(vector<vector<int>> grid)
-    {
-        vector<pair<int, int>> starts;
-
-        for (int i = 0; i < grid.size(); i++)
-        {
-            for (int j = 0; j < grid[i].size(); j++)
-            {
-                if (grid[i][j] == 2)
-                {
-                    starts.emplace_back(i, j);
-                }
-            }
-        }
-
-        vector<vector<int>> dist_grid(grid.size(), vector<int>(grid[0].size(), 0));
-        vector<vector<int>> reachable_count(grid.size(), vector<int>(grid[0].size(), 0));
-
-        vector<pair<int, int>> dir = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-
-        for (pair<int, int> start : starts)
-        {
-            queue<pair<pair<int, int>, int>> q;
-            pair<int, int> node = {start.first, start.second};
-            vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
-
-            q.push({{start.first, start.second}, 0});
-            visited[start.first][start.second] = true;
-            //int count = 0;
-
-            while (!q.empty())
-            {
-                pair<int, int> node = q.front().first;
-                int distance = q.front().second;
-                q.pop();
-
-                for (pair<int, int> d : dir)
-                {
-                    int nr = d.first + node.first;
-                    int nc = d.second + node.second;
-
-                    if (nr < grid.size() && nr >= 0 &&
-                        nc < grid[nr].size() && nc >= 0)
-                    {
-                        if (!visited[nr][nc] && grid[nr][nc] != 1 && grid[nr][nc] != 2)
-                        {
-                            visited[nr][nc] = true;
-                            int next_dist = distance + 1;
-                            q.push({{nr, nc}, next_dist});
-
-                            dist_grid[nr][nc] += next_dist;
-                            reachable_count[nr][nc]++;
-
-                        }
-                    }
-                }
-            }
-        }
-
-        long long min = -1; // Keep variable name 'min', use -1 to signify not found yet
-        pair<int, int> res = {-1, -1}; // Keep variable name 'res'
-
-
-        for (int i = 0; i < grid.size(); i++) {
-            for (int j = 0; j < grid[i].size(); j++) {
-
-                if (grid[i][j] == 0 && reachable_count[i][j] == starts.size()) {
-
-                    if (min == -1 || dist_grid[i][j] < min) {
-                        min = dist_grid[i][j]; // Update min with the new lowest distance sum
-                        res = {i, j};          // Update res with the coordinates of the best spot
-                    }
-                }
-            }
-            // cout << endl; // REMOVED
-        }
-
-        cout << "Distance Grid:" << endl;
-        for (int i = 0; i < grid.size(); i++)
-        {
-            for (int j = 0; j < grid[i].size(); j++)
-            {
-                cout << dist_grid[i][j] << "\t";
-            }
-            cout << endl;
-        }
-
-        cout << "\nReachable Count Grid:" << endl;
-        for (int i = 0; i < grid.size(); i++)
-        {
-            for (int j = 0; j < grid[i].size(); j++)
-            {
-                cout << reachable_count[i][j] << "\t";
-            }
-            cout << endl;
-        }
-        cout << endl;
-
-
-        return res;
+        cout << boolalpha << (numcourses == numCourses) << endl;
+        return (numcourses == numCourses) ? order : vector<int>();
     }
 };
 
-int main()
-{
+
+// --- Main function with test cases (modified slightly for clarity) ---
+int main() {
     Solution s;
-    // 1 is wall, 2 is equipment
-    vector<vector<int>> grid = {
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1},
-        {1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1},
-        {1, 0, 0, 1, 2, 0, 1, 0, 0, 0, 0, 1},
-        {1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-    };
+// Test case 1: Simple DAG without cycles
+    vector<vector<int>> prereq1 = {{1, 0}, {2, 1}, {3, 2}};
+    vector<int> result1 = s.canFinish(4, prereq1);
+    cout << "Test case 1 (Simple Chain): ";
+    if (result1.empty()) { cout << "Error - Should not detect cycle"; }
+    else { for (int i : result1) cout << i << " "; }
+    cout << "\n---\n" << endl;
 
-    auto result1 = s.shortestPath(grid);
-    cout << "Test case 1 - Original grid result:" << endl;
-    cout << "Expected: Point near center of equipment cluster" << endl;
-    cout << "Actual:" << result1.first << ", " << result1.second << endl;
+    // Test case 2: Simple cycle that should fail
+    vector<vector<int>> prereq2 = {{1, 0}, {2, 1}, {0, 2}};
+    vector<int> result2 = s.canFinish(3, prereq2);
+    cout << "Test case 2 (Simple Cycle): ";
+    if (result2.empty()) { cout << "Correctly detected cycle"; }
+    else { cout << "Failed - Should detect cycle"; }
+    cout << "\n---\n" << endl;
 
-    vector<vector<int>> grid2 = {
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 2, 2, 2, 0, 2, 1},
-        {1, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 2, 1},
-        {1, 0, 0, 0, 0, 0, 1},
-        {1, 2, 2, 2, 0, 2, 1},
-        {1, 1, 1, 1, 1, 1, 1}
-    };
+    // Test case 3: Complex DAG without cycles
+    vector<vector<int>> prereq3 = {{1, 0}, {2, 0}, {3, 1}, {3, 2}};
+    vector<int> result3 = s.canFinish(4, prereq3);
+    cout << "Test case 3 (Complex DAG): ";
+    if (result3.empty()) { cout << "Error - Should not detect cycle"; }
+    else { for (int i : result3) cout << i << " "; }
+    cout << "\n---\n" << endl;
 
-    auto result2 = s.shortestPath(grid2);
-    cout << "\nTest case 2 - Symmetric grid result:" << endl;
-    cout << "Expected: Central point equidistant from all equipment" << endl;
-    cout << "Actual:" << result2.first << ", " << result2.second << endl;
+    // Test case 4: Complex cycle
+    vector<vector<int>> prereq4 = {{1, 0}, {2, 1}, {3, 2}, {1, 3}};
+    vector<int> result4 = s.canFinish(4, prereq4);
+    cout << "Test case 4 (Complex Cycle): ";
+    if (result4.empty()) { cout << "Correctly detected cycle"; }
+    else { cout << "Failed - Should detect cycle"; }
+    cout << "\n---\n" << endl;
 
-
+    // Test case 5: Disconnected components without cycles
+    vector<vector<int>> prereq5 = {{1, 0}, {3, 2}};
+    vector<int> result5 = s.canFinish(4, prereq5);
+    cout << "Test case 5 (Disconnected): ";
+    if (result5.empty()) { cout << "Error - Should not detect cycle"; }
+    else { for (int i : result5) cout << i << " "; }
+    cout << "\n---\n" << endl;
     return 0;
 }

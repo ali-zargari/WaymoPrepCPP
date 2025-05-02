@@ -2,6 +2,7 @@
 #include <iostream>
 #include <map>
 #include <queue>
+#include <set>
 #include <stack>
 #include <vector>
 #include <unordered_set>
@@ -13,105 +14,52 @@ using namespace std;
 class Solution
 {
 public:
-    vector<int> canFinish(int numCourses, vector<vector<int>>& prerequisites)
+    int count_bits(int num)
     {
-        unordered_map<int, vector<int>> classes;
-        map<int, int> indegree;
-        vector<int> order;
+        int total = 0;
 
-        for (int i = 0; i < prerequisites.size(); i++)
+        int temp = num;
+
+        while (temp != 0)
         {
-            classes[prerequisites[i][1]].push_back(prerequisites[i][0]);
-            indegree[prerequisites[i][0]]++;
+            temp &= (temp - 1);
+            total++;
         }
 
-        for (int i = 0; i < numCourses; i++)
-        {
-            if (!indegree.count(i))
-            {
-                indegree[i] = 0;
-            }
-        }
+        return total;
+    }
 
-        queue<int> q;
-        for (auto &[k, v] : indegree)
-        {
-            if (v == 0)
-            {
-                q.push(k);
-                //order.push_back(k);
-            }
-        }
-
-
-        int numcourses = 0;
-
-        while (!q.empty())
-        {
-            int curr = q.front();
-            numcourses++;
-            q.pop();
-            //indegree[curr]--;
-
-            order.push_back(curr);
-
-
-            for (auto c : classes[curr])
-            {
-                if (--indegree[c] == 0)
-                {
-                    q.push(c);
-                }
-            }
-        }
-
-        cout << boolalpha << (numcourses == numCourses) << endl;
-        return (numcourses == numCourses) ? order : vector<int>();
+    int zero_bits(int num)
+    {
+        return sizeof(decltype(num))*8 - count_bits(num);
     }
 };
 
 
 // --- Main function with test cases (modified slightly for clarity) ---
-int main() {
+int main()
+{
     Solution s;
-// Test case 1: Simple DAG without cycles
-    vector<vector<int>> prereq1 = {{1, 0}, {2, 1}, {3, 2}};
-    vector<int> result1 = s.canFinish(4, prereq1);
-    cout << "Test case 1 (Simple Chain): ";
-    if (result1.empty()) { cout << "Error - Should not detect cycle"; }
-    else { for (int i : result1) cout << i << " "; }
-    cout << "\n---\n" << endl;
 
-    // Test case 2: Simple cycle that should fail
-    vector<vector<int>> prereq2 = {{1, 0}, {2, 1}, {0, 2}};
-    vector<int> result2 = s.canFinish(3, prereq2);
-    cout << "Test case 2 (Simple Cycle): ";
-    if (result2.empty()) { cout << "Correctly detected cycle"; }
-    else { cout << "Failed - Should detect cycle"; }
-    cout << "\n---\n" << endl;
+    // Test case 1: Number with multiple 1 bits
+    cout << "Test 1: Number 7 (111 in binary)" << endl;
+    cout << "Expected 1 bits: 3, Got: " << s.count_bits(7) << endl;
+    cout << "Expected 0 bits: 29, Got: " << s.zero_bits(7) << endl;
 
-    // Test case 3: Complex DAG without cycles
-    vector<vector<int>> prereq3 = {{1, 0}, {2, 0}, {3, 1}, {3, 2}};
-    vector<int> result3 = s.canFinish(4, prereq3);
-    cout << "Test case 3 (Complex DAG): ";
-    if (result3.empty()) { cout << "Error - Should not detect cycle"; }
-    else { for (int i : result3) cout << i << " "; }
-    cout << "\n---\n" << endl;
+    // Test case 2: Number with single 1 bit
+    cout << "Test 2: Number 8 (1000 in binary)" << endl;
+    cout << "Expected 1 bits: 1, Got: " << s.count_bits(8) << endl;
+    cout << "Expected 0 bits: 31, Got: " << s.zero_bits(8) << endl;
 
-    // Test case 4: Complex cycle
-    vector<vector<int>> prereq4 = {{1, 0}, {2, 1}, {3, 2}, {1, 3}};
-    vector<int> result4 = s.canFinish(4, prereq4);
-    cout << "Test case 4 (Complex Cycle): ";
-    if (result4.empty()) { cout << "Correctly detected cycle"; }
-    else { cout << "Failed - Should detect cycle"; }
-    cout << "\n---\n" << endl;
+    // Test case 3: Zero
+    cout << "Test 3: Number 0" << endl;
+    cout << "Expected 1 bits: 0, Got: " << s.count_bits(0) << endl;
+    cout << "Expected 0 bits: 32, Got: " << s.zero_bits(0) << endl;
 
-    // Test case 5: Disconnected components without cycles
-    vector<vector<int>> prereq5 = {{1, 0}, {3, 2}};
-    vector<int> result5 = s.canFinish(4, prereq5);
-    cout << "Test case 5 (Disconnected): ";
-    if (result5.empty()) { cout << "Error - Should not detect cycle"; }
-    else { for (int i : result5) cout << i << " "; }
-    cout << "\n---\n" << endl;
+    // Test case 4: Large number
+    cout << "Test 4: Number 15 (1111 in binary)" << endl;
+    cout << "Expected 1 bits: 4, Got: " << s.count_bits(15) << endl;
+    cout << "Expected 0 bits: 28, Got: " << s.zero_bits(15) << endl;
+
     return 0;
 }

@@ -1,80 +1,110 @@
-#include <vector>
-#include <algorithm>
-#include <map>
 #include <iostream>
+#include <unordered_map>
 
 
 using namespace std;
 
-class Solution {
+class Node
+{
 public:
-    vector<vector<int>> merge(vector<vector<int>>& intervals) {
-        if (intervals.empty())
-            return {};
+    int key;
+    int val;
+    Node* prev;
+    Node* next;
 
-        sort(intervals.begin(), intervals.end(), [](auto &a, auto &b)
+    Node(int k, int v) : key(k), val(v), prev(nullptr), next(nullptr)
+    {
+    }
+};
+
+class LRUCache
+{
+public:
+    LRUCache(const int cap): capacity(cap)
+    {
+        this->cache.clear();
+
+        this->left = new Node(0, 0);
+        this->right = new Node(0, 0);
+
+        this->left->next = right;
+        this->right->prev = left;
+    }
+
+    int get(int key)
+    {
+        if (cache.count(key))
         {
-            return a[0] < b[0];
-        });
+            Node* node = cache[key];
+            remove(node);
+            insert(node);
+            return node->val;
+        }
+        return -1;
+    }
 
-        //{1, 8}, {4, 5}
-        //
-        cout << "Sorted intervals: ";
-        for (const auto& interval : intervals)
+    void put(int key, int value)
+    {
+        if (cache.count(key))
         {
-            cout << "[" << interval[0] << "," << interval[1] << "] ";
+            remove(cache[key]);
         }
-        cout << endl;
+        Node* node = new Node(key, value);
+        cache[key] = node;
+        insert(node);
 
-
-        for (int i = 1; i < (int) intervals.size(); i++) {
-
-            if (intervals[i-1][1] >= intervals[i][0]) {
-
-                intervals[i-1][1] = max(intervals[i][1], intervals[i-1][1]);
-                intervals.erase(intervals.begin() + i);
-                i--;
-            }
+        if (cache.size() > capacity)
+        {
+            Node* lru = left->next;
+            remove(lru);
+            cache.erase(lru->key);
+            delete lru;
         }
+    }
 
-        return intervals;
+private:
+    int capacity;
+    unordered_map<int, Node*> cache;
+    Node *left, *right;
+
+    void insert(Node* node)
+    {
+        Node* prev = right->prev;
+        Node* nxt = right;
+
+        nxt->prev = node;
+        prev->next = node;
+
+        node->prev = prev;
+        node->next = nxt;
+    }
+
+    void remove(Node* node)
+    {
+        Node* nxt = node->next;
+        Node* prev = node->prev;
+
+        prev->next = nxt;
+        nxt->prev = prev;
     }
 };
 
 // --- Main function with test cases (modified slightly for clarity) ---
 int main()
 {
-    Solution s;
-    /*// Test case 1: Basic interval merging
-    vector<vector<int>> test1 = {{1, 3}, {2, 6}, {8, 10}, {15, 18}};
-    vector<vector<int>> result1 = s.merge(test1);
-    cout << "Test 1:\nExpected: [1,6] [8,10] [15,18]\nActual: ";
-    for (const auto& p : result1)
-    {
-        cout << "[" << p[0] << "," << p[1] << "] ";
-    }
-    cout << endl;*/
-
-    // Test case 2: Overlapping intervals
-    vector<vector<int>> test2 = {{1, 8}, {4, 5}};
-    vector<vector<int>> result2 = s.merge(test2);
-    cout << "Test 2:\nExpected: [1,8]\nActual: ";
-    for (const auto& p : result2)
-    {
-        cout << "[" << p[0] << "," << p[1] << "] ";
-    }
-    cout << endl;
-
-    /*
-    // Test case 3: Empty input
-    vector<vector<int>> test3;
-    vector<vector<int>> result3 = s.merge(test3);
-    cout << "Test 3:\nExpected: Empty\nActual: ";
-    if (result3.empty())
-    {
-        return 0;
-    }
-    */
-
+    LRUCache lru = LRUCache(2);
+    cout << "Putting 1,1" << endl;
+    lru.put(1, 1);
+    cout << "Putting 2,2" << endl;
+    lru.put(2, 2);
+    cout << "Getting 1: " << lru.get(1) << endl;
+    cout << "Putting 3,3" << endl;
+    lru.put(3, 3);
+    cout << "Getting 2: " << lru.get(2) << endl;
+    cout << "Putting 4,4" << endl;
+    lru.put(4, 4);
+    cout << "Getting 1: " << lru.get(1) << endl;
+    cout << "Getting 3: " << lru.get(3) << endl;
+    cout << "Getting 4: " << lru.get(4) << endl;
     return 0;
 }

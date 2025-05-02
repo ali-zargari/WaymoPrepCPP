@@ -13,28 +13,39 @@ using namespace std;
 class Solution
 {
 public:
-
-    vector<int> getToal(int N, vector<pair<int, int>> tickets)
+    vector<int> getTotal(int N, const vector<pair<int, int>>& tickets)
     {
-        // N timestamps: 0,1,…,N-1
-        vector<int> diff(N + 1, 0);
+        unordered_map<int, int> timeline;
+        vector<int> res;
 
-        for (auto& t : tickets)
+        //find the maximum end in tickets
+        int max_expiration = 0;
+
+        for (int i = 0; i < tickets.size(); i++)
         {
-            diff[t.first]++; // car arrives at time=in
-            if (t.second + 1 <= N) // remove it after time=out
-                diff[t.second + 1]--;
+            max_expiration = max(max_expiration, tickets[i].second);
+            cout << max_expiration << endl;
+
         }
 
-        // build the prefix-sum to get counts at times 0..N-1
-        vector<int> ans(N);
-        int cur = 0;
-        for (int time = 0; time < N; ++time)
+        //fill timeline
+        for (auto [start, end] : tickets)
         {
-            cur += diff[time];
-            ans[time] = cur;
+            timeline[start]++;
+            timeline[end+1]--;
         }
-        return ans;
+        int counter = 0;
+
+        for (int i = 0; i < max_expiration+1; i++)
+        {
+            //cout << "Here" << endl;
+
+            counter += timeline[i];
+            res.push_back(counter);
+        }
+
+        return res;
+
     }
 };
 
@@ -46,7 +57,7 @@ int main()
 
     // Test Case 3: Multiple cars with overlapping times
     vector<pair<int, int>> test3 = {{1, 3}, {2, 4}};
-    vector<int> result3 = s.getToal(5, test3);
+    vector<int> result3 = s.getTotal(5, test3);
     cout << "Test 1 (Multiple cars): ";
     for (int x : result3) cout << x << " ";
     cout << endl;

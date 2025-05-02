@@ -1,78 +1,80 @@
-#include <climits>
-#include <cmath>
+#include <vector>
+#include <algorithm>
+#include <map>
 #include <iostream>
 
 
 using namespace std;
 
-class Solution
-{
+class Solution {
 public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        if (intervals.empty())
+            return {};
 
-    long long MOD = 1000000007;
+        sort(intervals.begin(), intervals.end(), [](auto &a, auto &b)
+        {
+            return a[0] < b[0];
+        });
 
-    long long power(long long base, long long exp) {
-        long long res = 1;
-        base %= MOD; // Make sure base is within modulo range initially
-        while (exp > 0) {
-            // If exponent is odd, multiply result with base
-            if (exp % 2 == 1) {
-                res = (res * base) % MOD;
-            }
-            // Square the base and halve the exponent (integer division)
-            base = (base * base) % MOD;
-            exp /= 2;
+        //{1, 8}, {4, 5}
+        //
+        cout << "Sorted intervals: ";
+        for (const auto& interval : intervals)
+        {
+            cout << "[" << interval[0] << "," << interval[1] << "] ";
         }
-        return res;
-    }
+        cout << endl;
 
-    int countGoodNumbers(long long n) {
-        // Calculate the number of even and odd positioned indices
-        long long num_even_indices = (n + 1) / 2;
-        long long num_odd_indices = n / 2;
 
-        // Calculate 5^(num_even_indices) % MOD
-        long long count_even = power(5, num_even_indices);
+        for (int i = 1; i < (int) intervals.size(); i++) {
 
-        // Calculate 4^(num_odd_indices) % MOD
-        long long count_odd = power(4, num_odd_indices);
+            if (intervals[i-1][1] >= intervals[i][0]) {
 
-        // Multiply the results and take modulo
-        long long total = (count_even * count_odd) % MOD;
+                intervals[i-1][1] = max(intervals[i][1], intervals[i-1][1]);
+                intervals.erase(intervals.begin() + i);
+                i--;
+            }
+        }
 
-        return (int)total; // Cast to int if the function signature requires it
+        return intervals;
     }
 };
-
-// hit(1) adds hit to timestamp 1
-// hit(2) adds hit to timestamp 2
-// hit(3) adds hit to timestamp 3
-// 1-2-3 ... 304
-// get hit(4) 3-300 = -297...1 2 3
 
 // --- Main function with test cases (modified slightly for clarity) ---
 int main()
 {
-    Solution solution;
-long long test1 = 1;
-    long long test2 = 2;
-    long long test3 = 3;
-    long long test4 = 4;
-    long long test5 = 5;
-    long long test6 = 6;
-    long long test7 = 7;
-    long long test8 = 8;
-    long long test9 = 50;
+    Solution s;
+    /*// Test case 1: Basic interval merging
+    vector<vector<int>> test1 = {{1, 3}, {2, 6}, {8, 10}, {15, 18}};
+    vector<vector<int>> result1 = s.merge(test1);
+    cout << "Test 1:\nExpected: [1,6] [8,10] [15,18]\nActual: ";
+    for (const auto& p : result1)
+    {
+        cout << "[" << p[0] << "," << p[1] << "] ";
+    }
+    cout << endl;*/
 
-    cout << "Test 1 (n=1): " << solution.power(2, 100000) << endl;
-    cout << "Test 2 (n=2): " << solution.countGoodNumbers(test2) << endl;
-    cout << "Test 3 (n=3): " << solution.countGoodNumbers(test3) << endl;
-    cout << "Test 4 (n=4): " << solution.countGoodNumbers(test4) << endl;
-    cout << "Test 5 (n=5): " << solution.countGoodNumbers(test5) << endl;
-    cout << "Test 6 (n=6): " << solution.countGoodNumbers(test6) << endl;
-    cout << "Test 7 (n=7): " << solution.countGoodNumbers(test7) << endl;
-    cout << "Test 8 (n=8): " << solution.countGoodNumbers(test8) << endl;
-    cout << "Test 9 (n=9): " << solution.countGoodNumbers(test9) << endl;
+    // Test case 2: Overlapping intervals
+    vector<vector<int>> test2 = {{1, 8}, {4, 5}};
+    vector<vector<int>> result2 = s.merge(test2);
+    cout << "Test 2:\nExpected: [1,8]\nActual: ";
+    for (const auto& p : result2)
+    {
+        cout << "[" << p[0] << "," << p[1] << "] ";
+    }
+    cout << endl;
+
+    /*
+    // Test case 3: Empty input
+    vector<vector<int>> test3;
+    vector<vector<int>> result3 = s.merge(test3);
+    cout << "Test 3:\nExpected: Empty\nActual: ";
+    if (result3.empty())
+    {
+        return 0;
+    }
+    */
 
     return 0;
 }

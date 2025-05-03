@@ -11,48 +11,46 @@ class HitCounter
 {
 public:
 
-    vector<pair<int, int>> timeline;
-    int count;
+    // first timestamp, second count
+    deque<pair<int, int>> timeline;
+
+
 
     HitCounter()
     {
+        //timeline.reserve(300);
         count = 0;
-        //first = timestamp
-        // second = count
-        timeline = vector<pair<int, int>>(300, {0, 0});
     }
 
     void hit(int timeStamp)
     {
-        int index = timeStamp % 300;
 
-        if (timeline[index].first == timeStamp)
+        if (!timeline.empty() && timeline.back().first == timeStamp)
         {
-            timeline[index].second++;
+            timeline.back().second++;
         } else
         {
-            timeline[index].first = timeStamp;
-            timeline[index].second = 1;
+            timeline.emplace_back(timeStamp, 1);
         }
+        count++;
 
     }
 
     int getHits(int timeStamp)
     {
-        int total = 0;
 
-        for (int i = 0; i < 300; i++)
+        while (!timeline.empty() && timeStamp - 300 >= timeline.front().first)
         {
-            pair<int, int> bucket = timeline[i];
-
-            if (timeStamp - bucket.first < 300)
-            {
-                total += bucket.second;
-            }
+            count -= timeline.front().second;
+            timeline.pop_front();
         }
-
-        return total;
+        return count;
     }
+
+private:
+    int count;
+
+
 
 
 };
@@ -67,7 +65,6 @@ public:
 int main()
 {
     HitCounter counter;
-
 // hit at timestamp 1.
     counter.hit(1);
 
@@ -83,15 +80,10 @@ int main()
     // hit at timestamp 300.
     counter.hit(300);
 
-    counter.hit(600);
-
     // get hits at timestamp 300, should return 4.
     cout << counter.getHits(300) << endl;
 
     // get hits at timestamp 301, should return 3.
-    //cout << counter.getHits(900) << endl;
-
-    // get hits at timestamp 301, should return 3.
-    cout << counter.getHits(2) << endl;
+    cout << counter.getHits(301) << endl;
     return 0;
 }

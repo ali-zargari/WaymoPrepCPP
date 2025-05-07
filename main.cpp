@@ -1,10 +1,8 @@
 #include <iostream>
 #include <queue>
-#include <stack>
-#include <stdint.h>
-#include <string>
+#include <set>
+#include <unordered_map>
 #include <vector>
-
 
 using namespace std;
 
@@ -27,76 +25,52 @@ struct TreeNode
     }
 };
 
-class Solution
-{
+class Solution {
 public:
-    void islandsAndTreasure(vector<vector<int>>& grid)
-    {
-        if (grid.empty() || grid[0].empty()) return;
+    vector<int> canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        unordered_map<int, set<int>> classes;
+        vector<int> indegrees(numCourses, 0);
+        queue<int> q;
+        int numVisited = 0;
+        vector<int> res;
 
-        int inf = 2147483647;
-        vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
-        queue<pair<int, int>> q;
-
-
-        for (int i = 0; i < grid.size(); i++)
+        for (auto p:prerequisites)
         {
-            for (int j = 0; j < grid[i].size(); j++)
-            {
-                if (grid[i][j] == 0)
-                {
-                    q.emplace(i, j);
-                    visited[i][j] = true;
-                }
-            }
+            indegrees[p[0]]++;
+            classes[p[1]].emplace(p[0]);
+
         }
 
-        int dist = 0;
-
-        vector<vector<int>> dir = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int i = 0; i < indegrees.size(); i++)
+        {
+            if (indegrees[i] == 0)
+            {
+                q.push(i);
+            }
+        }
 
         while (!q.empty())
         {
-            int n = q.size();
-            dist++;
+            int node = q.front();
+            q.pop();
+            res.push_back(node);
+            numVisited++;
 
-            for (int i = 0; i < n; i++)
+            for (int i:classes[node])
             {
-                pair<int, int> node = q.front();
-                q.pop();
-
-                for (auto d : dir)
+                indegrees[i]--;
+                if (indegrees[i] == 0)
                 {
-                    int nr = d[0] + node.first;
-                    int nc = d[1] + node.second;
-
-                    if ((nr >= 0 && nr < grid.size()) &&
-                        (nc >= 0 && nc < grid[nr].size()))
-                    {
-                        if (grid[nr][nc] == inf &&
-                            grid[nr][nc] != -1 &&
-                            !visited[nr][nc])
-                        {
-                            grid[nr][nc] = dist;
-                            visited[nr][nc] = true;
-                            q.push({nr, nc});
-                        }
-                    }
+                    q.push(i);
                 }
             }
-        }
 
-        // Print the grid
-        for (const auto& row : grid)
-        {
-            for (const auto& cell : row)
-            {
-                cout << cell << " ";
-            }
-            cout << endl;
         }
+        
+        return res;
     }
 };
+
 
 
 // Main function provided by user - unchanged.
@@ -104,48 +78,40 @@ int main()
 {
     Solution s;
 
-    // Example 1
-    vector<vector<int>> grid1 = {
-        {2147483647, -1, 0, 2147483647},
-        {2147483647, 2147483647, 2147483647, -1},
-        {2147483647, -1, 2147483647, -1},
-        {0, -1, 2147483647, 2147483647}
-    };
-    cout << "Example 1 Input:" << endl;
-    s.islandsAndTreasure(grid1);
+// Test Case 1: No prerequisites
+    vector<vector<int>> prerequisites1;
+    vector<int> result1 = s.canFinish(2, prerequisites1);
+    cout << "Test Case 1 (No prerequisites): ";
+    for (int x : result1) cout << x << " ";
+    cout << endl;
 
-    // Example 2
-    vector<vector<int>> grid2 = {
-        {0, -1},
-        {2147483647, 2147483647}
-    };
-    cout << "\nExample 2 Input:" << endl;
-    s.islandsAndTreasure(grid2);
+    // Test Case 2: Valid prerequisites
+    vector<vector<int>> prerequisites2 = {{1, 0}};
+    vector<int> result2 = s.canFinish(2, prerequisites2);
+    cout << "Test Case 2 (Valid prerequisites): ";
+    for (int x : result2) cout << x << " ";
+    cout << endl;
 
-    // Example 3: Multiple treasures
-    vector<vector<int>> grid3 = {
-        {0, 2147483647, 0},
-        {2147483647, -1, 2147483647},
-        {0, 2147483647, 2147483647}
-    };
-    cout << "\nExample 3 Input:" << endl;
-    s.islandsAndTreasure(grid3);
+    // Test Case 3: Circular dependency
+    vector<vector<int>> prerequisites3 = {{1, 0}, {0, 1}};
+    vector<int> result3 = s.canFinish(2, prerequisites3);
+    cout << "Test Case 3 (Circular dependency): ";
+    for (int x : result3) cout << x << " ";
+    cout << endl;
 
+    // Test Case 4: Multiple valid prerequisites (4 classes)
+    vector<vector<int>> prerequisites4 = {{1, 0}, {2, 0}, {3, 1}, {3, 2}};
+    vector<int> result4 = s.canFinish(4, prerequisites4);
+    cout << "Test Case 4 (4 classes, valid dependencies): ";
+    for (int x : result4) cout << x << " ";
+    cout << endl;
 
-    // Example 4: Single cell
-    vector<vector<int>> grid4 = {{0}};
-    cout << "\nExample 4 Input:" << endl;
-    s.islandsAndTreasure(grid4);
-
-
-    // Example 5: All walls
-    vector<vector<int>> grid5 = {
-        {0, 2147483647, 2147483647, -1, 2147483647},
-        {2147483647, 2147483647, 2147483647, -1, 2147483647},
-        {2147483647, 2147483647, 2147483647, -1, 2147483647}
-    };
-    cout << "\nExample 5 Input:" << endl;
-    s.islandsAndTreasure(grid5);
+    // Test Case 5: Complex circular dependencies (5 classes)
+    vector<vector<int>> prerequisites5 = {{1, 0}, {2, 1}, {3, 2}, {4, 3}, {0, 4}};
+    vector<int> result5 = s.canFinish(5, prerequisites5);
+    cout << "Test Case 5 (5 classes, circular dependencies): ";
+    for (int x : result5) cout << x << " ";
+    cout << endl;
 
     return 0;
 }

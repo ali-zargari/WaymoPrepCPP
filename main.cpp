@@ -80,6 +80,53 @@ public:
         return res;
         
     }
+
+
+    vector<vector<int>> combinationSum2(vector<int>& nums)
+    {
+        sort(nums.begin(), nums.end());
+
+
+        struct Frame {
+            int idx;              // next index in candidates
+            vector<int> comb;     // current combination
+        };
+
+        //holds index
+        stack<Frame> stk;
+        stk.push({0, {}});
+
+        vector<vector<int>> res;
+
+        while (!stk.empty())
+        {
+            Frame curr = stk.top();
+            stk.pop();
+            int idx = curr.idx;
+            auto comb = curr.comb;
+
+            for (int i = idx; i < nums.size(); i++)
+            {
+                if (i > idx && nums[i] == nums[i-1])
+                {
+                    continue;
+                }
+
+                vector<int> temp = comb;
+                temp.push_back(nums[i]);
+
+                stk.push({i+1, temp});
+                res.push_back(temp);
+            }
+        }
+
+        res.push_back({});
+
+        return res;
+
+    }
+
+
 };
 
 
@@ -89,9 +136,9 @@ int main()
     Solution s;
 
     // Test Case 1
-vector<int> nums1 = {10, 1, 2, 7, 6, 1, 5};
+vector<int> nums1 = {1, 1, 2, 3, 3, 4, 4};
 int target1 = 8;
-vector<vector<int>> result1 = s.combinationSum(nums1, target1);
+vector<vector<int>> result1 = s.combinationSum2(nums1);
 cout << "Test Case 1 Results:" << endl;
 for (const auto& combo : result1) {
     cout << "[ ";
@@ -102,7 +149,7 @@ for (const auto& combo : result1) {
 // Test Case 2
 vector<int> nums2 = {2, 5, 2, 1, 2};
 int target2 = 5;
-vector<vector<int>> result2 = s.combinationSum(nums2, target2);
+vector<vector<int>> result2 = s.combinationSum2(nums2);
 cout << "\nTest Case 2 Results:" << endl;
 for (const auto& combo : result2) {
     cout << "[ ";
@@ -113,7 +160,7 @@ for (const auto& combo : result2) {
 // Test Case 3
 vector<int> nums3 = {1};
 int target3 = 1;
-vector<vector<int>> result3 = s.combinationSum(nums3, target3);
+vector<vector<int>> result3 = s.combinationSum2(nums3);
 cout << "\nTest Case 3 Results:" << endl;
 for (const auto& combo : result3) {
     cout << "[ ";

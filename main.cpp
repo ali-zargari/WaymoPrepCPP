@@ -1,6 +1,5 @@
 #include <iostream>
 #include <queue>
-#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -27,50 +26,45 @@ struct TreeNode
 
 class Solution {
 public:
-    vector<int> canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-        unordered_map<int, set<int>> classes;
-        vector<int> indegrees(numCourses, 0);
-        queue<int> q;
-        int numVisited = 0;
-        vector<int> res;
+    int findCheapestPrice(int n, vector<vector<int>>& flights, int src, int dst, int k) {
 
-        for (auto p:prerequisites)
+
+        unordered_map<int, vector<pair<int, int>>> adj;
+
+        for (auto row:flights)
         {
-            indegrees[p[0]]++;
-            classes[p[1]].emplace(p[0]);
-
+            adj[row[0]].emplace_back(row[2], row[1]);
         }
 
-        for (int i = 0; i < indegrees.size(); i++)
+
+        priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
+        pq.emplace(0, src, 0);
+
+
+        while (!pq.empty())
         {
-            if (indegrees[i] == 0)
+            auto [cost, flt_num, steps] = pq.top();
+            pq.pop();
+
+            if (dst == flt_num) return cost;
+
+
+            if (steps > k )
             {
-                q.push(i);
+                continue;
+            }
+
+
+            for (auto node:adj[flt_num])
+            {
+                pq.emplace(cost + node.first, node.second, steps+1);
             }
         }
 
-        while (!q.empty())
-        {
-            int node = q.front();
-            q.pop();
-            res.push_back(node);
-            numVisited++;
 
-            for (int i:classes[node])
-            {
-                indegrees[i]--;
-                if (indegrees[i] == 0)
-                {
-                    q.push(i);
-                }
-            }
-
-        }
-        
-        return res;
+        return -1;
     }
 };
-
 
 
 // Main function provided by user - unchanged.
@@ -78,40 +72,25 @@ int main()
 {
     Solution s;
 
-// Test Case 1: No prerequisites
-    vector<vector<int>> prerequisites1;
-    vector<int> result1 = s.canFinish(2, prerequisites1);
-    cout << "Test Case 1 (No prerequisites): ";
-    for (int x : result1) cout << x << " ";
-    cout << endl;
+// Test Case 1: Simple path with direct flight
+    // n = 3 cities (0,1,2), flights = [[0,1,100],[1,2,100],[0,2,500]], src = 0, dst = 2, k = 1
+    vector<vector<int>> flights1 = {{0, 1, 100}, {1, 2, 100}, {0, 2, 500}};
+    int result1 = s.findCheapestPrice(3, flights1, 0, 2, 1);
+    cout << "Test 1 Result: Expected = 200, Actual = " << result1
+        << (result1 == 200 ? " (PASS)" : " (FAIL)") << endl;
 
-    // Test Case 2: Valid prerequisites
-    vector<vector<int>> prerequisites2 = {{1, 0}};
-    vector<int> result2 = s.canFinish(2, prerequisites2);
-    cout << "Test Case 2 (Valid prerequisites): ";
-    for (int x : result2) cout << x << " ";
-    cout << endl;
+    // Test Case 2: No path available
+    // n = 3 cities, flights = [[0,1,100]], src = 0, dst = 2, k = 0
+    vector<vector<int>> flights2 = {{0, 1, 100}};
+    int result2 = s.findCheapestPrice(3, flights2, 0, 2, 0);
+    cout << "Test 2 Result: Expected = -1, Actual = " << result2
+        << (result2 == -1 ? " (PASS)" : " (FAIL)") << endl;
 
-    // Test Case 3: Circular dependency
-    vector<vector<int>> prerequisites3 = {{1, 0}, {0, 1}};
-    vector<int> result3 = s.canFinish(2, prerequisites3);
-    cout << "Test Case 3 (Circular dependency): ";
-    for (int x : result3) cout << x << " ";
-    cout << endl;
-
-    // Test Case 4: Multiple valid prerequisites (4 classes)
-    vector<vector<int>> prerequisites4 = {{1, 0}, {2, 0}, {3, 1}, {3, 2}};
-    vector<int> result4 = s.canFinish(4, prerequisites4);
-    cout << "Test Case 4 (4 classes, valid dependencies): ";
-    for (int x : result4) cout << x << " ";
-    cout << endl;
-
-    // Test Case 5: Complex circular dependencies (5 classes)
-    vector<vector<int>> prerequisites5 = {{1, 0}, {2, 1}, {3, 2}, {4, 3}, {0, 4}};
-    vector<int> result5 = s.canFinish(5, prerequisites5);
-    cout << "Test Case 5 (5 classes, circular dependencies): ";
-    for (int x : result5) cout << x << " ";
-    cout << endl;
-
+    // Test Case 3: Complex path with multiple options
+    // n = 4 cities, multiple paths with different costs
+    vector<vector<int>> flights3 = {{0, 1, 100}, {1, 2, 100}, {2, 3, 100}, {0, 3, 500}};
+    int result3 = s.findCheapestPrice(4, flights3, 0, 3, 2);
+    cout << "Test 3 Result: Expected = 300, Actual = " << result3
+        << (result3 == 300 ? " (PASS)" : " (FAIL)") << endl;
     return 0;
 }

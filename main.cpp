@@ -28,105 +28,53 @@ struct TreeNode
 class Solution
 {
 public:
-    vector<vector<int>> combinationSum(vector<int>& candidates, int target)
+    vector<string> letterCombinations(string digits)
     {
-        sort(candidates.begin(), candidates.end());
+        unordered_map<int, vector<char>> adj;
 
+        adj[2] = {'a', 'b', 'c'};
+        adj[3] = {'d', 'e', 'f'};
+        adj[4] = {'g', 'h', 'i'};
+        adj[5] = {'j', 'k', 'l'};
+        adj[6] = {'m', 'n', 'o'};
+        adj[7] = {'p', 'q', 'r', 's'};
+        adj[8] = {'t', 'u', 'v'};
+        adj[9] = {'w', 'x', 'y', 'z'};
 
-        struct Frame {
-            int idx;              // next index in candidates
-            int sum;              // sum so far
-            vector<int> comb;     // current combination
-        };
+        vector<string> res;
 
-        //holds index
-        stack<Frame> stk;
-        stk.push({0, 0, {}});
-
-        vector<vector<int>> res;
-        
-        while (!stk.empty())
+        struct Frame
         {
-            Frame curr = stk.top();
-            stk.pop();
-            int idx = curr.idx;
-            int sum = curr.sum;
-            auto comb = curr.comb;
-
-            for (int i = idx; i < candidates.size(); i++)
-            {
-                int total = sum + candidates[i];
-
-                if (total > target)
-                {
-                    break;
-                }
-
-
-                auto temp = comb;
-                temp.push_back(candidates[i]);
-
-                if (total == target)
-                {
-                    res.push_back(temp);
-                } else
-                {
-                    stk.push({i, total, temp});
-                }
-
-            }
-        }
-        
-        return res;
-        
-    }
-
-
-    vector<vector<int>> combinationSum2(vector<int>& nums)
-    {
-        sort(nums.begin(), nums.end());
-
-
-        struct Frame {
-            int idx;              // next index in candidates
-            vector<int> comb;     // current combination
+            int idx;
+            string comb;
         };
 
-        //holds index
         stack<Frame> stk;
-        stk.push({0, {}});
 
-        vector<vector<int>> res;
+
+        stk.push({0, ""});
 
         while (!stk.empty())
         {
-            Frame curr = stk.top();
+            auto curr = stk.top();
             stk.pop();
-            int idx = curr.idx;
-            auto comb = curr.comb;
-
-            for (int i = idx; i < nums.size(); i++)
+            if (curr.idx == digits.size())
             {
-                if (i > idx && nums[i] == nums[i-1])
-                {
-                    continue;
-                }
+                res.push_back(curr.comb);
 
-                vector<int> temp = comb;
-                temp.push_back(nums[i]);
+                continue;
+            }
 
-                stk.push({i+1, temp});
-                res.push_back(temp);
+            int d = digits[curr.idx] - '0';
+            for (auto it = adj[d].rbegin(); it != adj[d].rend(); ++it)
+            {
+                char ch = *it;
+                stk.push({curr.idx + 1, curr.comb + ch});
             }
         }
 
-        res.push_back({});
-
         return res;
-
     }
-
-
 };
 
 
@@ -134,39 +82,16 @@ public:
 int main()
 {
     Solution s;
+    string digits = "23";
+    vector<string> result = s.letterCombinations(digits);
+    vector<string> expected = {"ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"};
 
-    // Test Case 1
-vector<int> nums1 = {1, 1, 2, 3, 3, 4, 4};
-int target1 = 8;
-vector<vector<int>> result1 = s.combinationSum2(nums1);
-cout << "Test Case 1 Results:" << endl;
-for (const auto& combo : result1) {
-    cout << "[ ";
-    for (int num : combo) cout << num << " ";
-    cout << "]" << endl;
-}
-
-// Test Case 2
-vector<int> nums2 = {2, 5, 2, 1, 2};
-int target2 = 5;
-vector<vector<int>> result2 = s.combinationSum2(nums2);
-cout << "\nTest Case 2 Results:" << endl;
-for (const auto& combo : result2) {
-    cout << "[ ";
-    for (int num : combo) cout << num << " ";
-    cout << "]" << endl;
-}
-
-// Test Case 3
-vector<int> nums3 = {1};
-int target3 = 1;
-vector<vector<int>> result3 = s.combinationSum2(nums3);
-cout << "\nTest Case 3 Results:" << endl;
-for (const auto& combo : result3) {
-    cout << "[ ";
-    for (int num : combo) cout << num << " ";
-    cout << "]" << endl;
-}
-
+    cout << "Test Case 1:" << endl;
+    cout << "Input: " << digits << endl;
+    cout << "Expected: ";
+    for (string str : expected) cout << str << " ";
+    cout << endl << "Actual: ";
+    for (string str : result) cout << str << " ";
+    cout << endl;
     return 0;
 }

@@ -1,5 +1,6 @@
+#include <algorithm>
 #include <iostream>
-#include <queue>
+#include <stack>
 #include <unordered_map>
 #include <vector>
 
@@ -24,45 +25,60 @@ struct TreeNode
     }
 };
 
-class Solution {
+class Solution
+{
 public:
-    int findCheapestPrice(int n, vector<vector<int>>& flights, int src, int dst, int k) {
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target)
+    {
+        sort(candidates.begin(), candidates.end());
 
 
-        unordered_map<int, vector<pair<int, int>>> adj;
+        struct Frame {
+            int idx;              // next index in candidates
+            int sum;              // sum so far
+            vector<int> comb;     // current combination
+        };
 
-        for (auto row:flights)
+        //holds index
+        stack<Frame> stk;
+        stk.push({0, 0, {}});
+
+        vector<vector<int>> res;
+        
+        while (!stk.empty())
         {
-            adj[row[0]].emplace_back(row[2], row[1]);
-        }
+            Frame curr = stk.top();
+            stk.pop();
+            int idx = curr.idx;
+            int sum = curr.sum;
+            auto comb = curr.comb;
 
-
-        priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
-        pq.emplace(0, src, 0);
-
-
-        while (!pq.empty())
-        {
-            auto [cost, flt_num, steps] = pq.top();
-            pq.pop();
-
-            if (dst == flt_num) return cost;
-
-
-            if (steps > k )
+            for (int i = idx; i < candidates.size(); i++)
             {
-                continue;
-            }
+                int total = sum + candidates[i];
+
+                if (total > target)
+                {
+                    break;
+                }
 
 
-            for (auto node:adj[flt_num])
-            {
-                pq.emplace(cost + node.first, node.second, steps+1);
+                auto temp = comb;
+                temp.push_back(candidates[i]);
+
+                if (total == target)
+                {
+                    res.push_back(temp);
+                } else
+                {
+                    stk.push({i, total, temp});
+                }
+
             }
         }
-
-
-        return -1;
+        
+        return res;
+        
     }
 };
 
@@ -72,25 +88,38 @@ int main()
 {
     Solution s;
 
-// Test Case 1: Simple path with direct flight
-    // n = 3 cities (0,1,2), flights = [[0,1,100],[1,2,100],[0,2,500]], src = 0, dst = 2, k = 1
-    vector<vector<int>> flights1 = {{0, 1, 100}, {1, 2, 100}, {0, 2, 500}};
-    int result1 = s.findCheapestPrice(3, flights1, 0, 2, 1);
-    cout << "Test 1 Result: Expected = 200, Actual = " << result1
-        << (result1 == 200 ? " (PASS)" : " (FAIL)") << endl;
+    // Test Case 1
+vector<int> nums1 = {10, 1, 2, 7, 6, 1, 5};
+int target1 = 8;
+vector<vector<int>> result1 = s.combinationSum(nums1, target1);
+cout << "Test Case 1 Results:" << endl;
+for (const auto& combo : result1) {
+    cout << "[ ";
+    for (int num : combo) cout << num << " ";
+    cout << "]" << endl;
+}
 
-    // Test Case 2: No path available
-    // n = 3 cities, flights = [[0,1,100]], src = 0, dst = 2, k = 0
-    vector<vector<int>> flights2 = {{0, 1, 100}};
-    int result2 = s.findCheapestPrice(3, flights2, 0, 2, 0);
-    cout << "Test 2 Result: Expected = -1, Actual = " << result2
-        << (result2 == -1 ? " (PASS)" : " (FAIL)") << endl;
+// Test Case 2
+vector<int> nums2 = {2, 5, 2, 1, 2};
+int target2 = 5;
+vector<vector<int>> result2 = s.combinationSum(nums2, target2);
+cout << "\nTest Case 2 Results:" << endl;
+for (const auto& combo : result2) {
+    cout << "[ ";
+    for (int num : combo) cout << num << " ";
+    cout << "]" << endl;
+}
 
-    // Test Case 3: Complex path with multiple options
-    // n = 4 cities, multiple paths with different costs
-    vector<vector<int>> flights3 = {{0, 1, 100}, {1, 2, 100}, {2, 3, 100}, {0, 3, 500}};
-    int result3 = s.findCheapestPrice(4, flights3, 0, 3, 2);
-    cout << "Test 3 Result: Expected = 300, Actual = " << result3
-        << (result3 == 300 ? " (PASS)" : " (FAIL)") << endl;
+// Test Case 3
+vector<int> nums3 = {1};
+int target3 = 1;
+vector<vector<int>> result3 = s.combinationSum(nums3, target3);
+cout << "\nTest Case 3 Results:" << endl;
+for (const auto& combo : result3) {
+    cout << "[ ";
+    for (int num : combo) cout << num << " ";
+    cout << "]" << endl;
+}
+
     return 0;
 }

@@ -8,39 +8,35 @@ using namespace std;
 
 class Solution {
 public:
-    int climbStairs(int n) {
-        //int res = 0;
 
-        int first = 1;
-        int second = 1;
+    int rob(vector<int>& nums) {
 
-        for (int i = 0; i < n; i++)
+        if (nums.size() == 1)
         {
-            int temp = second;
-            second = first + second;
-            first = temp;
+            return nums[0];
         }
 
-        return first;
-    }
-
-    int minCostClimbingStairs(vector<int>& cost)
-    {
-        int first = cost[0];
-        int second = cost[1];
-        int index = 2;
-        
-
-        while (index < cost.size())
+        if (nums.size() == 2)
         {
-            int temp = second;
-            second = min(first, second) + cost[index];
-            first = temp;
-            index++;
+            return max(nums[0], nums[1]);
         }
 
-        return min(first, second);
+        vector<int> dp (nums.size());
+        int res;
+
+        dp[0] = nums[0];
+        dp[1]= max(dp[0], nums[1]);
+
+        for (int i = 2; i < nums.size(); i++)
+        {
+            dp[i] = max(dp[i-1], nums[i] + dp[i-2]);
+            res = dp[i];
+        }
+
+
+        return res;
     }
+
 };
 
 
@@ -49,20 +45,15 @@ int main()
 {
     Solution s;
 
-    // Test cases for climbStairs
-    cout << "Testing climbStairs function:\n";
-    cout << "n = 2: " << s.climbStairs(2) << " (Expected: 2)\n";
-    cout << "n = 3: " << s.climbStairs(3) << " (Expected: 3)\n";
-    cout << "n = 4: " << s.climbStairs(4) << " (Expected: 5)\n";
-    cout << "n = 5: " << s.climbStairs(5) << " (Expected: 8)\n";
+    vector<int> test1 = {1, 3, 1};
+    cout << "Test 1: Expected: 3, Actual: " << s.rob(test1) << endl;
 
-    // Test cases for minCostClimbingStairs
-    cout << "\nTesting minCostClimbingStairs function:\n";
-    vector<int> cost1 = {10, 15, 20};
-    vector<int> cost2 = {1, 100, 1, 1, 1, 100, 1, 1, 100, 1};
+    vector<int> test2 = {2, 7, 9, 3, 1};
+    cout << "Test 2: Expected: 12, Actual: " << s.rob(test2) << endl;
 
-    cout << "Cost = [10,15,20]: " << s.minCostClimbingStairs(cost1) << " (Expected: 15)\n";
-    cout << "Cost = [1,100,1,1,1,100,1,1,100,1]: " << s.minCostClimbingStairs(cost2) << " (Expected: 6)\n";
+    vector<int> test3 = {2, 1, 1, 2};
+    cout << "Test 3: Expected: 4, Actual: " << s.rob(test3) << endl;
+
 
     return 0;
 }

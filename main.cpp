@@ -1,68 +1,77 @@
-#include <algorithm>
 #include <iostream>
-#include <stack>
-#include <unordered_map>
 #include <vector>
 
 using namespace std;
 
-class Solution
-{
+class Solution {
 public:
-    int rob(vector<int>& nums)
-    {
-        if (nums.size() == 1)
+    string longestPalindrome(string s) {
+        //'a b a b d b a'
+
+        if (s.size() == 0)
         {
-            return nums[0];
+            return "";
         }
+        vector<vector<bool>> dp(s.size(), vector<bool>(s.size(), false));
+        string res = "";
+        int resLen = 0;
+        int resIndex = -1;
 
-        if (nums.size() == 2)
+        for (int i = 0; i < s.size(); i++)
         {
-            return max(nums[0], nums[1]);
-        }
-
-        vector<int> dp(nums.size());
-        int res;
-
-        dp[0] = nums[0];
-        dp[1] = max(dp[0], nums[1]);
-
-        for (int i = 2; i < nums.size(); i++)
-        {
-            dp[i] = max(dp[i - 1], nums[i] + dp[i - 2]);
-            res = dp[i];
-        }
-
-
-        return res;
-    }
-
-
-    int rob2(vector<int>& nums)
-    {
-        if (nums.size() == 1)
-        {
-            return nums[0];
-        }
-
-        auto solveDp = [&](vector<int> numtemp)
-        {
-            vector<int> dp(numtemp.size());
-            //int res;
-
-            dp[0] = numtemp[0];
-            dp[1] = max(dp[0], numtemp[1]);
-
-            for (int i = 2; i < numtemp.size(); i++)
+            for (int j = 0; j <= i; j++)
             {
-                dp[i] = max(dp[i - 1], numtemp[i] + dp[i - 2]);
-                //res = dp[i];
-            }
-            return dp.back();
-        };
+                if (s[j] == s[i]) { // Outer characters match
+                    if (i - j < 2) { // Length 1 (i==j) or Length 2 (i==j+1)
+                        dp[i][j] = true;
+                    } else { // Length 3 or more
+                        dp[i][j] = dp[i-1][j+1]; // Check inner palindrome s[j+1...i-1]
+                    }
 
-        return max(solveDp(vector<int>(nums.begin(), nums.end()-1)), solveDp(vector<int>(nums.begin()+1, nums.end())));
+                    if (dp[i][j] && (i - j + 1 > resLen)) {
+                        resLen = i - j + 1;
+                        resIndex = j;
+                    }
+                }
+            }
+        }
+
+        return s.substr(resIndex, resLen);
+
     }
+
+
+    int countSubstrings(string s) {
+        //'a b a b d b a'
+        vector<vector<bool>> dp(s.size(), vector<bool>(s.size(), false));
+        int count = 0;
+
+        for (int i = 0; i < s.size(); i++)
+        {
+            for (int j = 0; j <= i; j++)
+            {
+                if (s[j] == s[i])
+                {
+                    if (i - j < 2)
+                    {
+                        dp[j][i] = true;
+                    } else
+                    {
+                        dp[j][i] = dp[j+1][i-1];
+                    }
+
+                    if (dp[j][i])
+                    {
+                        count++;
+                    }
+                }
+            }
+        }
+
+        return count;
+
+    }
+
 };
 
 
@@ -71,15 +80,42 @@ int main()
 {
     Solution s;
 
-    vector<int> test1 = {3, 4, 3};
-    cout << "Test 1: Expected: 3, Actual: " << s.rob2(test1) << endl;
+    // Test cases
+    vector<pair<string, string>> testCases = {
+        {"babad", "bab"},
+        {"cbbd", "bb"},
+        {"a", "a"},
+        {"ac", "a"},
+        {"abba", "abba"},
+        {"aaaaa", "aaaaa"},
+        {"", ""}
+    };
 
-    vector<int> test2 = {2, 7, 9, 3, 1};
-    cout << "Test 2: Expected: 12, Actual: " << s.rob(test2) << endl;
+    for (const auto& test : testCases)
+    {
+        string result = s.longestPalindrome(test.first);
+        cout << "Input: \"" << test.first << "\"\n";
+        cout << "Expected: \"" << test.second << "\"\n";
+        cout << "Output: \"" << result << "\"\n";
+        cout << "Result: " << (result == test.second ? "PASS" : "FAIL") << "\n\n";
+    }
 
-    vector<int> test3 = {2, 1, 1, 2};
-    cout << "Test 3: Expected: 4, Actual: " << s.rob(test3) << endl;
+    vector<pair<string, int>> countTestCases = {
+        {"abc", 3},
+        {"aaa", 6},
+        {"abba", 6},
+        {"", 0}
+    };
 
+    cout << "\nTesting countSubstrings:\n";
+    for (const auto& test : countTestCases)
+    {
+        int result = s.countSubstrings(test.first);
+        cout << "Input: \"" << test.first << "\"\n";
+        cout << "Expected: " << test.second << "\n";
+        cout << "Output: " << result << "\n";
+        cout << "Result: " << (result == test.second ? "PASS" : "FAIL") << "\n\n";
+    }
 
     return 0;
 }

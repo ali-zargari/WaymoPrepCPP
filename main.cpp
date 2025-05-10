@@ -6,52 +6,60 @@
 
 using namespace std;
 
-class Solution {
+class Solution
+{
 public:
-    int numDecodings(string s) {
+    int numDecodings(string s)
+    {
         //what we really want to find is a form of all(some) possible combos, where order matters.
-        set<int> dp;
+        unordered_map<int, int> dp;
         vector<string> v;
 
 
         struct Frame
         {
-            int start;
-            int end;
-            string comb;
+            int index; // The current character index in 's' we are considering
+            string combination; // The combination (subsequence) built so far
         };
 
         stack<Frame> stk;
-        stk.push({0, 0, ""});
+        stk.push({0, s});
+        int count = 0;
 
         while (!stk.empty())
         {
-            Frame node = stk.top();
+            Frame currentFrame = stk.top();
             stk.pop();
-            int strt = node.start;
-            int end = node.end;
-            string comb = node.comb;
 
-            if (strt > end && comb.size() == s.size())
+            int currentIndex = currentFrame.index;
+            string currentCombination = currentFrame.combination;
+
+            // Base case: If we have processed all characters in the string 's'
+            if (currentIndex == s.length())
+            {
+                count++;
                 continue;
+            }
 
-            v.push_back(comb);
+            if (currentCombination[currentIndex] == '0')
+            {
+                continue;
+            }
 
-            if (strt == end )
-                stk.push({strt, end+1, comb+s[strt]});
-            else
-                stk.push({strt+1, end, comb+s[strt]});
-            
-            
+            stk.push({currentIndex + 1, currentCombination});
+
+            if (currentIndex < s.size()-1)
+            {
+                if (s[currentIndex] == '1' ||
+                    ((s[currentIndex] == '2') && s[currentIndex+1] < '7'))
+                {
+                    stk.push({currentIndex + 2, currentCombination});
+                }
+            }
+
         }
 
-
-        // Print vector v
-        for (const auto& str : v)
-        {
-            cout << str << ", " << endl;
-        }
-        return v.size();
+        return count;
     }
 };
 
@@ -61,7 +69,7 @@ int main()
 {
     Solution s;
 
-    s.numDecodings("1023");
+    cout << s.numDecodings("28");
 
     return 0;
 }

@@ -36,29 +36,35 @@ public:
         return dfs(0, s, dp);
     }
 
-    long long coinChange(vector<int>& coins, long long amount) {
+    long long coinChange(vector<int>& coins, long long amount)
+    {
         if (amount == 0) return 0;
-        unordered_map<long long,int> best{{0,0}};
-        stack<pair<int,long long>> stk;
-        stk.push({0,0});
+        unordered_map<long long, int> best{{0, 0}};
+        stack<pair<int, long long>> stk;
+        stk.push({0, 0});
         int ans = INT_MAX;
 
-        while (!stk.empty()) {
+        while (!stk.empty())
+        {
             auto [steps,sum] = stk.top();
             stk.pop();
 
-            for (auto c : coins) {
+            for (auto c : coins)
+            {
                 long long nxt = sum + c;
                 int s = steps + 1;
 
                 if (s >= ans || nxt > amount) continue;
 
-                if (nxt == amount) {
+                if (nxt == amount)
+                {
                     ans = min(ans, s);
-
-                } else {
+                }
+                else
+                {
                     auto it = best.find(nxt);
-                    if (it == best.end() || s < it->second) {
+                    if (it == best.end() || s < it->second)
+                    {
                         best[nxt] = s;
                         stk.push({s, nxt});
                     }
@@ -70,18 +76,73 @@ public:
     }
 
 
+    int maxProduct(vector<int>& nums)
+    {
+        if (nums.size() == 0)
+        {
+            return -1;
+        }
 
+        struct Frame
+        {
+            int index;
+            vector<int> state;
+        };
 
+        stack<Frame> stk;
+        stk.push({0, {}});
+    }
+
+    bool wordBreak(string s, vector<string>& wordDict)
+    {
+        string temp = s;
+
+        stack<int> stk;
+        unordered_map<int, int> memo;
+        stk.push(0);
+
+        while (!stk.empty())
+        {
+            int current = stk.top();
+
+            stk.pop();
+
+            if (current == s.size())
+            {
+                return true;;
+            }
+
+            if (current > s.size())
+            {
+                memo[current] = -1;
+                continue;
+            }
+
+            for (const string& str : wordDict)
+            {
+                if (current + str.size() <= s.size() &&
+                    s.compare(current, str.size(), str) == 0 &&
+                    memo[current + str.size()] != -1)
+                {
+                    stk.push(current + str.size());
+                }
+            }
+        }
+
+        return false;
+    }
 };
 
+    // Main function provided by user - unchanged.
+    int main()
+    {
+        Solution s;
+        vector<string> v = {"car", "ca", "rs", "d"};
 
-// Main function provided by user - unchanged.
-int main()
-{
-    Solution s;
+        cout << boolalpha << s.wordBreak("carsd", v);
 
-    vector<int> coins = {25, 10, 5, 2, 1, 50, 100, 20, 40, 60};
-    cout << s.coinChange(coins, 200) << endl;
 
-    return 0;
-}
+
+        return 0;
+    }
+    //}

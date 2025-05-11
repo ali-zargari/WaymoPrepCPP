@@ -95,7 +95,6 @@ public:
 
     bool wordBreak(string s, vector<string>& wordDict)
     {
-        string temp = s;
 
         stack<int> stk;
         unordered_map<int, int> memo;
@@ -104,32 +103,84 @@ public:
         while (!stk.empty())
         {
             int current = stk.top();
-
             stk.pop();
+
+            if (memo.contains(current) && memo[current] == -1)
+            {
+                continue;
+            }
 
             if (current == s.size())
             {
                 return true;;
             }
 
-            if (current > s.size())
-            {
-                memo[current] = -1;
-                continue;
-            }
-
+            bool deadend = true;
             for (const string& str : wordDict)
             {
                 if (current + str.size() <= s.size() &&
                     s.compare(current, str.size(), str) == 0 &&
-                    memo[current + str.size()] != -1)
+                    (!memo.contains(current + str.size()) || memo[current + str.size()] != -1))
                 {
+                    deadend = false;
                     stk.push(current + str.size());
                 }
+            }
+
+            if (deadend)
+            {
+                memo[current] = -1;
             }
         }
 
         return false;
+    }
+
+    vector<vector<int>> allSubsets(vector<int> nums)
+    {
+
+        struct Frame
+        {
+            int index;
+            vector<int> combination;
+        };
+
+        int maxCount = 1;
+
+        stack<Frame> stk;
+        stk.push({0, {}});
+
+        vector<vector<int>> res;
+
+
+        while (!stk.empty())
+        {
+            Frame current = stk.top();
+            int index = current.index;
+            vector<int> comb = current.combination;
+            stk.pop();
+
+            if (index == nums.size())
+            {
+
+                res.push_back(comb);
+                continue;
+            }
+
+
+
+            stk.push({index+1, comb});
+            comb.push_back(nums[index]);
+            stk.push({index+1, comb});
+            maxCount++;
+
+        }
+
+
+        cout << maxCount << endl;
+
+        return res;
+
     }
 };
 
@@ -137,12 +188,20 @@ public:
     int main()
     {
         Solution s;
-        vector<string> v = {"car", "ca", "rs", "d"};
+        vector<int> nums = {1, 2, 3};
+        vector<vector<int>> subsets = s.allSubsets(nums);
 
-        cout << boolalpha << s.wordBreak("carsd", v);
-
-
+        cout << "Subsets for {1, 2, 3}:" << endl;
+        for (const auto& subset : subsets)
+        {
+            cout << "{ ";
+            for (int num : subset)
+            {
+                cout << num << " ";
+            }
+            cout << "}" << endl;
+        }
 
         return 0;
     }
-    //}
+

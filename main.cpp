@@ -78,24 +78,24 @@ public:
 
     int maxProduct(vector<int>& nums)
     {
-        if (nums.size() == 0)
+        int curMin = 1;
+        int curMax = 1;
+        int res = nums[0];
+
+        for (int i = 0; i < nums.size(); i++)
         {
-            return -1;
+            int temp = curMax * nums[i];
+            curMax = max(max(nums[i] * curMax, nums[i] * curMin), nums[i]);
+            curMin = min(min(temp, nums[i] * curMin), nums[i]);
+
+            res = max(res, curMax);
         }
 
-        struct Frame
-        {
-            int index;
-            vector<int> state;
-        };
-
-        stack<Frame> stk;
-        stk.push({0, {}});
+        return res;
     }
 
     bool wordBreak(string s, vector<string>& wordDict)
     {
-
         stack<int> stk;
         unordered_map<int, int> memo;
         stk.push(0);
@@ -138,7 +138,6 @@ public:
 
     vector<vector<int>> allSubsets(vector<int> nums)
     {
-
         struct Frame
         {
             int index;
@@ -162,46 +161,101 @@ public:
 
             if (index == nums.size())
             {
-
                 res.push_back(comb);
                 continue;
             }
 
 
-
-            stk.push({index+1, comb});
+            stk.push({index + 1, comb});
             comb.push_back(nums[index]);
-            stk.push({index+1, comb});
+            stk.push({index + 1, comb});
             maxCount++;
-
         }
 
 
         cout << maxCount << endl;
 
         return res;
-
     }
-};
 
-    // Main function provided by user - unchanged.
-    int main()
-    {
-        Solution s;
-        vector<int> nums = {1, 2, 3};
-        vector<vector<int>> subsets = s.allSubsets(nums);
+    int lengthOfLIS(vector<int>& nums) {
 
-        cout << "Subsets for {1, 2, 3}:" << endl;
-        for (const auto& subset : subsets)
+        int count = 0;
+        int index = 0;
+        //int res = -1;
+
+        struct Frame
         {
-            cout << "{ ";
-            for (int num : subset)
+            int index;
+            vector<int> comb;
+        };
+
+        stack<Frame> stk;
+        stk.push({0, {}});
+        vector<vector<int>> res;
+
+        unordered_map<int, int> memo;
+
+        //size, comb
+        priority_queue<pair<int, vector<int>>> pq;
+
+        while (!stk.empty())
+        {
+            Frame curr = stk.top();
+            stk.pop();
+            int index = curr.index;
+            vector<int> comb = curr.comb;
+
+            if (index >= nums.size())
+            {
+                res.push_back(comb);
+                pq.emplace(comb.size(), comb);
+                continue;
+            }
+
+            stk.push({index+1, comb});
+
+            if (comb.empty() || nums[index] > comb.back())
+            {
+                comb.push_back(nums[index]);
+                stk.push({index+1, comb});
+            }
+        }
+
+        for (const auto& sequence : res)
+        {
+            for (const auto& num : sequence)
             {
                 cout << num << " ";
             }
-            cout << "}" << endl;
+            cout << endl;
         }
 
-        return 0;
+
+
+
+
+        return pq.top().first;
     }
 
+
+    bool canPartition(vector<int>& nums) {
+
+    }
+    
+};
+
+// Main function provided by user - unchanged.
+int main()
+{
+    Solution s;
+
+    //vector<int> test1 = {9,1,4,2,3,3,7};
+    //cout << "Test 1 (Expected 4): \n" << s.lengthOfLIS(test1) << endl;
+
+    // vector<int> test2 = {0,3,1,3,2,3};
+    // cout << "Test 2 (Expected 4): " << s.lengthOfLIS(test2) << endl;
+
+
+    return 0;
+}

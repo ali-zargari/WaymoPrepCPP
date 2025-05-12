@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <set>
 #include <stack>
+#include <unordered_set>
 #include <vector>
 
 using namespace std;
@@ -240,7 +241,71 @@ public:
 
 
     bool canPartition(vector<int>& nums) {
+        int total = 0;
 
+
+        for (int i : nums)
+        {
+            total += i;
+        }
+
+        cout << total << endl;
+        if (total % 2 != 0)
+        {
+            return false;
+        }
+
+        total = total/2;
+
+        vector<vector<bool>> visited(nums.size()+1, vector<bool>(total+1, false));
+
+
+        struct Frame
+        {
+            int index;
+            int sum;
+
+        };
+
+
+        stack<Frame> stk;
+        stk.push({0, 0});
+        unordered_map<int, int> memo;
+
+        while (!stk.empty())
+        {
+
+            Frame curr = stk.top();
+            stk.pop();
+            int index = curr.index;
+            int sum = curr.sum;
+
+            if (sum == total)
+            {
+                return true;
+            }
+
+            if (sum > total)
+            {
+                continue;
+            }
+
+            if (index >= nums.size())
+            {
+                continue;
+            }
+
+            if (visited[index][sum])
+                continue;
+
+            visited[index][sum] = true;
+
+            stk.push({index+1, sum+nums[index]});
+            stk.push({index+1, sum});
+
+        }
+
+        return false;
     }
     
 };
@@ -250,8 +315,8 @@ int main()
 {
     Solution s;
 
-    //vector<int> test1 = {9,1,4,2,3,3,7};
-    //cout << "Test 1 (Expected 4): \n" << s.lengthOfLIS(test1) << endl;
+    vector<int> test1 = {1, 9, 3, 9};
+    cout << "Test 1: " << boolalpha << s.canPartition(test1) << endl;
 
     // vector<int> test2 = {0,3,1,3,2,3};
     // cout << "Test 2 (Expected 4): " << s.lengthOfLIS(test2) << endl;

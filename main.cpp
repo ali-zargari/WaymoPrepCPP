@@ -307,7 +307,113 @@ public:
 
         return false;
     }
-    
+
+    int uniquePaths(int m, int n) {
+
+        int arr[m][n];
+        int res = 0;
+
+        for (int i = 0; i < m; i++)
+        {
+            arr[i][0] = 1;
+        }
+        for (int i = 0; i < n; i++)
+        {
+            arr[0][i] = 1;
+        }
+
+        for (int i = 1; i < m; i++ )
+        {
+            for (int j = 1; j < n; j++)
+            {
+                arr[i][j] = arr[i-1][j] + arr[i][j-1];
+            }
+        }
+
+        return arr[m-1][n-1];
+    }
+
+
+
+    int longestCommonSubsequence(string text1, string text2) {
+        //Approach: We could find all the subsequences of each. for one of the words, keep it in an unordered map.
+        //then just go through them one by one nd see whichever one has the biggest length.
+
+
+        unordered_map<string, int> dict;
+
+
+        auto dfs = [&](string text, vector<string>& sq){
+
+            dict.clear();
+
+            struct Frame{
+                int index;
+                string comb;
+            };
+
+            stack<Frame> stk;
+            stk.push({0, ""});
+
+
+            unordered_set<string> visited;
+
+
+            while(!stk.empty()){
+                Frame current = stk.top();
+                stk.pop();
+
+                int index = current.index;
+                string comb = current.comb;
+
+
+                if(index == text.size()){
+                    visited.insert(comb);
+                    cout << comb << endl;
+                    sq.push_back(comb);
+                    continue;
+                }
+
+                if (visited.contains(comb))
+                {
+                    continue;
+                }
+
+                stk.push({index+1, comb});
+                stk.push({index+1, comb+text[index]});
+
+
+
+            }
+
+
+        };
+
+        vector<string> subseqs1;
+
+        dfs(text1, subseqs1);
+
+
+
+        int res = 0;
+
+        for (string str : subseqs1)
+        {
+            if (text2.contains(str))
+            {
+
+                if (str.size() > res)
+                {
+                    res = str.size();
+                }
+            }
+        }
+
+        return res;
+
+    }
+
+
 };
 
 // Main function provided by user - unchanged.
@@ -315,12 +421,30 @@ int main()
 {
     Solution s;
 
-    vector<int> test1 = {1, 9, 3, 9};
-    cout << "Test 1: " << boolalpha << s.canPartition(test1) << endl;
+string text1 = "abcde";
+    string text2 = "ace";
+    cout << "Testing longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
+    cout << "Expected: 3, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
 
-    // vector<int> test2 = {0,3,1,3,2,3};
-    // cout << "Test 2 (Expected 4): " << s.lengthOfLIS(test2) << endl;
+    text1 = "abc";
+    text2 = "def";
+    cout << "\nTesting longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
+    cout << "Expected: 0, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
 
+    text1 = "abcdgh";
+    text2 = "aedfhr";
+    cout << "\nTesting longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
+    cout << "Expected: 3, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
+
+    text1 = "aggtab";
+    text2 = "gxtxayb";
+    cout << "\nTesting longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
+    cout << "Expected: 4, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
+
+    text1 = "";
+    text2 = "abc";
+    cout << "\nTesting longest common subsequence of empty string and 'abc'" << endl;
+    cout << "Expected: 0, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
 
     return 0;
 }

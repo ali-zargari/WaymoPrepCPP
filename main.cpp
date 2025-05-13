@@ -11,8 +11,6 @@ using namespace std;
 class Solution
 {
 public:
-
-
     int numDecodings(string s)
     {
         // unordered_map<int, int> dp;
@@ -162,8 +160,8 @@ public:
         return res;
     }
 
-    int lengthOfLIS(vector<int>& nums) {
-
+    int lengthOfLIS(vector<int>& nums)
+    {
         int count = 0;
         int index = 0;
         //int res = -1;
@@ -197,12 +195,12 @@ public:
                 continue;
             }
 
-            stk.push({index+1, comb});
+            stk.push({index + 1, comb});
 
             if (comb.empty() || nums[index] > comb.back())
             {
                 comb.push_back(nums[index]);
-                stk.push({index+1, comb});
+                stk.push({index + 1, comb});
             }
         }
 
@@ -216,14 +214,12 @@ public:
         }
 
 
-
-
-
         return pq.top().first;
     }
 
 
-    bool canPartition(vector<int>& nums) {
+    bool canPartition(vector<int>& nums)
+    {
         int total = 0;
 
 
@@ -238,16 +234,15 @@ public:
             return false;
         }
 
-        total = total/2;
+        total = total / 2;
 
-        vector<vector<bool>> visited(nums.size()+1, vector<bool>(total+1, false));
+        vector<vector<bool>> visited(nums.size() + 1, vector<bool>(total + 1, false));
 
 
         struct Frame
         {
             int index;
             int sum;
-
         };
 
 
@@ -257,7 +252,6 @@ public:
 
         while (!stk.empty())
         {
-
             Frame curr = stk.top();
             stk.pop();
             int index = curr.index;
@@ -283,16 +277,15 @@ public:
 
             visited[index][sum] = true;
 
-            stk.push({index+1, sum+nums[index]});
-            stk.push({index+1, sum});
-
+            stk.push({index + 1, sum + nums[index]});
+            stk.push({index + 1, sum});
         }
 
         return false;
     }
 
-    int uniquePaths(int m, int n) {
-
+    int uniquePaths(int m, int n)
+    {
         int arr[m][n];
         int res = 0;
 
@@ -305,17 +298,16 @@ public:
             arr[0][i] = 1;
         }
 
-        for (int i = 1; i < m; i++ )
+        for (int i = 1; i < m; i++)
         {
             for (int j = 1; j < n; j++)
             {
-                arr[i][j] = arr[i-1][j] + arr[i][j-1];
+                arr[i][j] = arr[i - 1][j] + arr[i][j - 1];
             }
         }
 
-        return arr[m-1][n-1];
+        return arr[m - 1][n - 1];
     }
-
 
 
     int longestCommonSubsequence(string text1, string text2)
@@ -323,8 +315,7 @@ public:
         //Approach:
 
 
-
-        vector<vector<int>> dp(text1.size()+1, vector<int>(text2.size()+1, 0));
+        vector<vector<int>> dp(text1.size() + 1, vector<int>(text2.size() + 1, 0));
 
         for (int i = 0; i < text1.size(); i++)
         {
@@ -332,20 +323,20 @@ public:
             {
                 if (text1[i] == text2[j])
                 {
-
-                    dp[i+1][j+1] = dp[i][j] + 1;
-                } else
+                    dp[i + 1][j + 1] = dp[i][j] + 1;
+                }
+                else
                 {
-                    dp[i+1][j+1] = max(dp[i+1][j], dp[i][j+1]);
+                    dp[i + 1][j + 1] = max(dp[i + 1][j], dp[i][j + 1]);
                 }
             }
         }
 
         return dp[text1.size()][text2.size()];
-
     }
 
-    int dfs (int index, int sum, vector<int>& prices, bool buy,  unordered_map<string, int> dp){
+    int dfs(int index, int sum, vector<int>& prices, bool buy, unordered_map<string, int> dp)
+    {
         if (index >= prices.size())
         {
             return 0;
@@ -360,29 +351,76 @@ public:
             return dp[key];
         }
 
-        int cooldown = dfs(index+1, sum, prices, buy, dp);
+        int cooldown = dfs(index + 1, sum, prices, buy, dp);
 
         if (buy)
         {
-            newsum = dfs(index+1, sum, prices, false, dp) - prices[index];
+            newsum = dfs(index + 1, sum, prices, false, dp) - prices[index];
             dp[key] = max(cooldown, newsum);
-        } else
+        }
+        else
         {
-            newsum = dfs(index+2, sum, prices, true, dp) + prices[index];
+            newsum = dfs(index + 2, sum, prices, true, dp) + prices[index];
             dp[key] = max(cooldown, newsum);
         }
         return dp[key];
-
     };
 
-    int maxProfit(vector<int>& prices) {
-
-
+    int maxProfit(vector<int>& prices)
+    {
         unordered_map<string, int> dp;
         return dfs(0, 0, prices, true, dp);
-
     }
 
+    int changeDFS(int index, int sum, int amount, vector<int> coins, vector<vector<int>>& res, vector<int> curr, vector<vector<int>>& mp)
+    {
+        if (index >= coins.size() || sum > amount)
+        {
+            return 0;
+        }
+        if (sum == amount)
+        {
+            res.push_back(curr);
+            return 1;
+        }
+
+        if (mp[index][sum] != -1)
+        {
+            return mp[index][sum];
+        }
+
+        int total = 0;
+
+        curr.push_back(coins[index]);
+
+        if (sum + coins[index] <= amount)
+        {
+            total += changeDFS(index, sum + coins[index], amount, coins, res, curr, mp);
+        }
+
+        curr.pop_back();
+
+        if (index+1 < coins.size())
+        {
+            total += changeDFS(index + 1, sum, amount, coins, res, curr, mp);
+        }
+
+        mp[index][sum] = total;
+
+        return total;
+    }
+
+    int change(int amount, vector<int>& coins)
+    {
+        vector<vector<int>> res;
+        vector<vector<int>> mp(coins.size()+1, vector<int>(amount+1, -1));
+
+        if (amount == 0) return 1;
+        if (coins.empty()) return 0;
+        int total = changeDFS(0, 0, amount, coins, res, {}, mp);
+
+        return total;
+    }
 };
 
 // Main function provided by user - unchanged.
@@ -390,13 +428,13 @@ int main()
 {
     Solution s;
 
-    vector<int> prices1 = {7, 1, 5, 3, 6, 4};
-    vector<int> prices2 = {7, 6, 4, 3, 1};
-    vector<int> prices3 = {1, 2, 3, 4, 5};
+    vector<int> coins1 = {102,89,76,63,50,37,24,11};
+    vector<int> coins2 = {2};
+    vector<int> coins3 = {10};
 
-    cout << "Test Case 1: [7,1,5,3,6,4] - Expected: 7, Got: " << s.maxProfit(prices1) << endl;
-    cout << "Test Case 2: [7,6,4,3,1] - Expected: 0, Got: " << s.maxProfit(prices2) << endl;
-    cout << "Test Case 3: [1,2,3,4,5] - Expected: 4, Got: " << s.maxProfit(prices3) << endl;
+    cout << "Test Case 1: Amount=5000, Coins=[102,89,76,63,50,37,24,11] - Expected: 992951208, Got: " << s.change(5000, coins1) << endl;
+    cout << "Test Case 2: Amount=3, Coins=[2] - Expected: 0, Got: " << s.change(3, coins2) << endl;
+    cout << "Test Case 3: Amount=10, Coins=[10] - Expected: 1, Got: " << s.change(10, coins3) << endl;
 
     return 0;
 }

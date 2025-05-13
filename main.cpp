@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <queue>
 #include <unordered_map>
 #include <set>
@@ -372,7 +374,8 @@ public:
         return dfs(0, 0, prices, true, dp);
     }
 
-    int changeDFS(int index, int sum, int amount, vector<int> coins, vector<vector<int>>& res, vector<int> curr, vector<vector<int>>& mp)
+    int changeDFS(int index, int sum, int amount, vector<int> coins, vector<vector<int>>& res, vector<int> curr,
+                  vector<vector<int>>& mp)
     {
         if (index >= coins.size() || sum > amount)
         {
@@ -400,7 +403,7 @@ public:
 
         curr.pop_back();
 
-        if (index+1 < coins.size())
+        if (index + 1 < coins.size())
         {
             total += changeDFS(index + 1, sum, amount, coins, res, curr, mp);
         }
@@ -413,13 +416,46 @@ public:
     int change(int amount, vector<int>& coins)
     {
         vector<vector<int>> res;
-        vector<vector<int>> mp(coins.size()+1, vector<int>(amount+1, -1));
+        vector<vector<int>> mp(coins.size() + 1, vector<int>(amount + 1, -1));
 
         if (amount == 0) return 1;
         if (coins.empty()) return 0;
         int total = changeDFS(0, 0, amount, coins, res, {}, mp);
 
         return total;
+    }
+
+    int ftswDFS(int index, int target, int& count, int sum, vector<int>& nums, vector<vector<int>>& dp, int totalsum)
+    {
+        //cout << "Level " << index << ": sum = " << sum << endl;
+
+        if (index == nums.size())
+            if (sum == target)
+            {
+                return 1;
+            }
+            else
+                return 0;
+
+
+        if (dp[index][sum + totalsum] != INT_MIN)
+        {
+            return dp[index][sum + totalsum];
+        }
+
+        int adding      = ftswDFS(index + 1, target, count, sum + nums[index], nums, dp, totalsum);
+        int subtracting = ftswDFS(index + 1, target, count, sum - nums[index], nums, dp, totalsum);
+        dp[index][sum + totalsum] = adding + subtracting;
+
+        return adding + subtracting;
+    }
+
+    int findTargetSumWays(vector<int>& nums, int target)
+    {
+        int count = 0;
+        int totalSum = accumulate(nums.begin(), nums.end(), 0);
+        vector<vector<int>> dp(nums.size() + 1, vector<int>(2 * totalSum + 1, INT_MIN));
+        return ftswDFS(0, target, count, 0, nums, dp, totalSum);
     }
 };
 
@@ -428,13 +464,23 @@ int main()
 {
     Solution s;
 
-    vector<int> coins1 = {102,89,76,63,50,37,24,11};
-    vector<int> coins2 = {2};
-    vector<int> coins3 = {10};
+    // // Test case 1: Basic test with small array
+    vector<int> nums1 = {2, 2, 2};
+    int target1 = 2;
+    cout << "Test case 1: nums = [2, 2, 2], target = 2" << endl;
+    cout << "Expected: 3, Output: " << s.findTargetSumWays(nums1, target1) << endl;
 
-    cout << "Test Case 1: Amount=5000, Coins=[102,89,76,63,50,37,24,11] - Expected: 992951208, Got: " << s.change(5000, coins1) << endl;
-    cout << "Test Case 2: Amount=3, Coins=[2] - Expected: 0, Got: " << s.change(3, coins2) << endl;
-    cout << "Test Case 3: Amount=10, Coins=[10] - Expected: 1, Got: " << s.change(10, coins3) << endl;
+    // Test case 2: Array with zeros
+    vector<int> nums2 = {1, 0};
+    int target2 = 1;
+    cout << "Test case 2: nums = [1,0], target = 1" << endl;
+    cout << "Expected: 2, Output: " << s.findTargetSumWays(nums2, target2) << endl;
+
+    // Test case 3: Larger numbers
+    vector<int> nums3 = {1, 2, 3, 4, 5};
+    int target3 = 3;
+    cout << "Test case 3: nums = [1,2,3,4,5], target = 3" << endl;
+    cout << "Expected: 3, Output: " << s.findTargetSumWays(nums3, target3) << endl;
 
     return 0;
 }

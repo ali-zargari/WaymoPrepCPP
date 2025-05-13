@@ -11,30 +11,13 @@ using namespace std;
 class Solution
 {
 public:
-    int dfs(int i, string& s, unordered_map<int, int> dp)
-    {
-        if (dp.contains(i)) return dp[i];
-        if (s[i] == '0') return 0;
 
-        int res = dfs(i + 1, s, dp);
-        if (i < s.size() - 1)
-        {
-            if (s[i] == '1' ||
-                (s[i] == '2' && s[i + 1] < '7'))
-            {
-                res += dfs(i + 2, s, dp);
-            }
-        }
-
-        dp[i] = res;
-        return res;
-    }
 
     int numDecodings(string s)
     {
-        unordered_map<int, int> dp;
-        dp[s.size()] = 1;
-        return dfs(0, s, dp);
+        // unordered_map<int, int> dp;
+        // dp[s.size()] = 1;
+        return 0;
     }
 
     long long coinChange(vector<int>& coins, long long amount)
@@ -335,84 +318,70 @@ public:
 
 
 
-    int longestCommonSubsequence(string text1, string text2) {
-        //Approach: We could find all the subsequences of each. for one of the words, keep it in an unordered map.
-        //then just go through them one by one nd see whichever one has the biggest length.
-
-
-        unordered_map<string, int> dict;
-
-
-        auto dfs = [&](string text, vector<string>& sq){
-
-            dict.clear();
-
-            struct Frame{
-                int index;
-                string comb;
-            };
-
-            stack<Frame> stk;
-            stk.push({0, ""});
-
-
-            unordered_set<string> visited;
-
-
-            while(!stk.empty()){
-                Frame current = stk.top();
-                stk.pop();
-
-                int index = current.index;
-                string comb = current.comb;
-
-
-                if(index == text.size()){
-                    visited.insert(comb);
-                    cout << comb << endl;
-                    sq.push_back(comb);
-                    continue;
-                }
-
-                if (visited.contains(comb))
-                {
-                    continue;
-                }
-
-                stk.push({index+1, comb});
-                stk.push({index+1, comb+text[index]});
+    int longestCommonSubsequence(string text1, string text2)
+    {
+        //Approach:
 
 
 
-            }
+        vector<vector<int>> dp(text1.size()+1, vector<int>(text2.size()+1, 0));
 
-
-        };
-
-        vector<string> subseqs1;
-
-        dfs(text1, subseqs1);
-
-
-
-        int res = 0;
-
-        for (string str : subseqs1)
+        for (int i = 0; i < text1.size(); i++)
         {
-            if (text2.contains(str))
+            for (int j = 0; j < text2.size(); j++)
             {
-
-                if (str.size() > res)
+                if (text1[i] == text2[j])
                 {
-                    res = str.size();
+
+                    dp[i+1][j+1] = dp[i][j] + 1;
+                } else
+                {
+                    dp[i+1][j+1] = max(dp[i+1][j], dp[i][j+1]);
                 }
             }
         }
 
-        return res;
+        return dp[text1.size()][text2.size()];
 
     }
 
+    int dfs (int index, int sum, vector<int>& prices, bool buy,  unordered_map<string, int> dp){
+        if (index >= prices.size())
+        {
+            return 0;
+        }
+
+        int newsum = 0;
+
+        string key = to_string(index) + "-" + to_string(buy);
+
+        if (dp.find(key) != dp.end())
+        {
+            return dp[key];
+        }
+
+        int cooldown = dfs(index+1, sum, prices, buy, dp);
+
+        if (buy)
+        {
+            newsum = dfs(index+1, sum, prices, false, dp) - prices[index];
+            dp[key] = max(cooldown, newsum);
+        } else
+        {
+            newsum = dfs(index+2, sum, prices, true, dp) + prices[index];
+            dp[key] = max(cooldown, newsum);
+        }
+        return dp[key];
+
+    };
+
+    int maxProfit(vector<int>& prices) {
+
+
+        unordered_map<string, int> dp;
+        return dfs(0, 0, prices, true, dp);
+
+    }
 
 };
 
@@ -421,30 +390,13 @@ int main()
 {
     Solution s;
 
-string text1 = "abcde";
-    string text2 = "ace";
-    cout << "Testing longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
-    cout << "Expected: 3, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
+    vector<int> prices1 = {7, 1, 5, 3, 6, 4};
+    vector<int> prices2 = {7, 6, 4, 3, 1};
+    vector<int> prices3 = {1, 2, 3, 4, 5};
 
-    text1 = "abc";
-    text2 = "def";
-    cout << "\nTesting longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
-    cout << "Expected: 0, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
-
-    text1 = "abcdgh";
-    text2 = "aedfhr";
-    cout << "\nTesting longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
-    cout << "Expected: 3, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
-
-    text1 = "aggtab";
-    text2 = "gxtxayb";
-    cout << "\nTesting longest common subsequence of '" << text1 << "' and '" << text2 << "'" << endl;
-    cout << "Expected: 4, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
-
-    text1 = "";
-    text2 = "abc";
-    cout << "\nTesting longest common subsequence of empty string and 'abc'" << endl;
-    cout << "Expected: 0, Got: " << s.longestCommonSubsequence(text1, text2) << endl;
+    cout << "Test Case 1: [7,1,5,3,6,4] - Expected: 7, Got: " << s.maxProfit(prices1) << endl;
+    cout << "Test Case 2: [7,6,4,3,1] - Expected: 0, Got: " << s.maxProfit(prices2) << endl;
+    cout << "Test Case 3: [1,2,3,4,5] - Expected: 4, Got: " << s.maxProfit(prices3) << endl;
 
     return 0;
 }

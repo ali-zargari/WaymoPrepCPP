@@ -1,84 +1,102 @@
+#include <algorithm>
 #include <queue>
 #include <unordered_map>
 #include <vector>
 #include <unordered_set>
 #include <iostream>
+#include <stack>
 
 using namespace std;
 
-class Solution
-{
+class Solution {
 public:
-    int networkDelayTime(vector<vector<int>>& times, int n, int k)
-    {
-        //start from k, and do a BFS. we will save all the accumulated delay times.
+    vector<string> findItinerary(vector<vector<string>>& tickets) {
+        //find the node with 0 indegree.
+        //airports that are in the to spot have indegrees.
 
-        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
-        q.emplace(0, k);
+        //key is the airport, value is indegree
+        unordered_map<string, priority_queue<string, vector<string>, greater<>>> flight_map;
 
-        unordered_map<int, vector<pair<int, int>>> graph;
-        unordered_set<int> visited;
-        int time = 1;
 
-        for (auto& stats : times)
+        for (int i = 0; i < tickets.size(); i++)
         {
-            // stats[0] = source, stats[1] = destination, stats[2] = time
-            graph[stats[0]].emplace_back(stats[1], stats[2]);
+            flight_map[tickets[i][0]].push(tickets[i][1]);
         }
 
-        // Initialize distances to all vertices as infinity
-        vector<int> dist(n+1, INT_MAX);
-        dist[k] = 0;
 
-        while (!q.empty())
+        stack<string> stk;
+        stk.push("JFK");
+
+        vector<string> res;
+
+
+        while (!stk.empty())
         {
-            auto current = q.top();
-            q.pop();
-            int currTime = current.first;
-            int currNode = current.second;
+            string curr = stk.top();
+            //stk.pop();
 
-            if (visited.count(currNode))
+            //res.push_back(curr);
+
+
+            if (flight_map.count(curr) && !flight_map[curr].empty()){
+
+                stk.push(flight_map[curr].top());
+                flight_map[curr].pop();
+
+            } else
             {
-                continue;
+                stk.pop();
+                res.push_back(curr);
             }
 
-            visited.insert(currNode);
-
-
-            for (auto& dest : graph[currNode]) {
-                int next = dest.first;
-                int weight = dest.second;
-                if (!visited.count(next) && currTime + weight < dist[next]) {
-                    dist[next] = currTime + weight;
-                    q.emplace(dist[next], next);
-                    }
-            }
         }
+        reverse(res.begin(), res.end());
+        return res;
 
-        for (int i = 1; i <= n; ++i) {
-            if (dist[i] == INT_MAX)
-                return -1;                  // some node never reached
-            time = max(time, dist[i]);      // longest shortest path
-        }
-        return time;
     }
 };
-
 
 int main()
 {
     Solution s;
 
-    vector<vector<int>> times = {{1, 2, 1}, {2, 3, 1}, {1, 4, 4}, {3, 4, 1}};
-    int n = 4, k = 1;
-    cout << s.networkDelayTime(times, n, k) << endl; // Should output: 2
+    vector<vector<string>> tickets1 = {{"MUC", "LHR"}, {"JFK", "MUC"}, {"SFO", "SJC"}, {"LHR", "SFO"}};
+    vector<vector<string>> tickets2 = {{"JFK", "SFO"}, {"JFK", "ATL"}, {"SFO", "ATL"}, {"ATL", "JFK"}, {"ATL", "SFO"}};
+    vector<vector<string>> tickets3 = {{"JFK", "KUL"}, {"JFK", "NRT"}, {"NRT", "JFK"}};
+    vector<vector<string>> tickets4 = {{"BUF", "HOU"}, {"HOU", "SEA"}, {"JFK", "BUF"}};
 
-    times = {{1, 2, 1}, {2, 3, 1}};
-    n = 3, k = 2;
-    cout << s.networkDelayTime(times, n, k) << endl; // Should output: 1
 
-    times = {{1, 2, 1}};
-    n = 2, k = 2;
-    cout << s.networkDelayTime(times, n, k) << endl; // Should output: -1
+    cout << "Test case 1: " << endl;
+    vector<string> result1 = s.findItinerary(tickets1);
+    for (const auto& airport : result1)
+    {
+        cout << airport << " ";
+    }
+    cout << endl;
+
+    cout << "Test case 2: " << endl;
+    vector<string> result2 = s.findItinerary(tickets2);
+    for (const auto& airport : result2)
+    {
+        cout << airport << " ";
+    }
+    cout << endl;
+
+    cout << "Test case 3: " << endl;
+    vector<string> result3 = s.findItinerary(tickets3);
+    for (const auto& airport : result3)
+    {
+        cout << airport << " ";
+    }
+    cout << endl;
+
+    cout << "Test case 4: " << endl;
+    vector<string> result4 = s.findItinerary(tickets4);
+    for (const auto& airport : result4)
+    {
+        cout << airport << " ";
+    }
+    cout << endl;
+
     return 0;
 }

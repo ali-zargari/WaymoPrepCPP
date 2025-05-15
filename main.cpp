@@ -1,102 +1,105 @@
-#include <algorithm>
-#include <queue>
-#include <unordered_map>
 #include <vector>
-#include <unordered_set>
 #include <iostream>
-#include <stack>
 
 using namespace std;
 
-class Solution {
+class Solution
+{
 public:
-    vector<string> findItinerary(vector<vector<string>>& tickets) {
-        //find the node with 0 indegree.
-        //airports that are in the to spot have indegrees.
+    void rotate(vector<vector<int>>& matrix)
+    {
+        vector<vector<int>> res(matrix.size(), vector<int>(matrix[0].size(), -1));
 
-        //key is the airport, value is indegree
-        unordered_map<string, priority_queue<string, vector<string>, greater<>>> flight_map;
-
-
-        for (int i = 0; i < tickets.size(); i++)
+        for (int i = 0; i < matrix.size(); i++)
         {
-            flight_map[tickets[i][0]].push(tickets[i][1]);
-        }
-
-
-        stack<string> stk;
-        stk.push("JFK");
-
-        vector<string> res;
-
-
-        while (!stk.empty())
-        {
-            string curr = stk.top();
-            //stk.pop();
-
-            //res.push_back(curr);
-
-
-            if (flight_map.count(curr) && !flight_map[curr].empty()){
-
-                stk.push(flight_map[curr].top());
-                flight_map[curr].pop();
-
-            } else
+            for (int j = 0; j< matrix[i].size(); j++)
             {
-                stk.pop();
-                res.push_back(curr);
+                int newCol = matrix[i].size() - i - 1;
+                res[j][newCol] = matrix[i][j];
             }
-
         }
-        reverse(res.begin(), res.end());
-        return res;
 
+        matrix = res;
     }
 };
+
 
 int main()
 {
     Solution s;
 
-    vector<vector<string>> tickets1 = {{"MUC", "LHR"}, {"JFK", "MUC"}, {"SFO", "SJC"}, {"LHR", "SFO"}};
-    vector<vector<string>> tickets2 = {{"JFK", "SFO"}, {"JFK", "ATL"}, {"SFO", "ATL"}, {"ATL", "JFK"}, {"ATL", "SFO"}};
-    vector<vector<string>> tickets3 = {{"JFK", "KUL"}, {"JFK", "NRT"}, {"NRT", "JFK"}};
-    vector<vector<string>> tickets4 = {{"BUF", "HOU"}, {"HOU", "SEA"}, {"JFK", "BUF"}};
-
-
-    cout << "Test case 1: " << endl;
-    vector<string> result1 = s.findItinerary(tickets1);
-    for (const auto& airport : result1)
+// Test case 1: 3x3 matrix
+    vector<vector<int>> matrix1 = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+    vector<vector<int>> expected1 = {
+        {7, 4, 1},
+        {8, 5, 2},
+        {9, 6, 3}
+    };
+    s.rotate(matrix1);
+    cout << "Test case 1:\nExpected:\n";
+    for (const auto& row : expected1)
     {
-        cout << airport << " ";
+        for (const auto& val : row) cout << val << " ";
+        cout << "\n";
     }
-    cout << endl;
-
-    cout << "Test case 2: " << endl;
-    vector<string> result2 = s.findItinerary(tickets2);
-    for (const auto& airport : result2)
+    cout << "Actual:\n";
+    for (const auto& row : matrix1)
     {
-        cout << airport << " ";
+        for (const auto& val : row) cout << val << " ";
+        cout << "\n";
     }
-    cout << endl;
 
-    cout << "Test case 3: " << endl;
-    vector<string> result3 = s.findItinerary(tickets3);
-    for (const auto& airport : result3)
+    // Test case 2: 4x4 matrix
+    vector<vector<int>> matrix2 = {
+        {5, 1, 9, 11},
+        {2, 4, 8, 10},
+        {13, 3, 6, 7},
+        {15, 14, 12, 16}
+    };
+    vector<vector<int>> expected2 = {
+        {15, 13, 2, 5},
+        {14, 3, 4, 1},
+        {12, 6, 8, 9},
+        {16, 7, 10, 11}
+    };
+    s.rotate(matrix2);
+    cout << "\nTest case 2:\nExpected:\n";
+    for (const auto& row : expected2)
     {
-        cout << airport << " ";
+        for (const auto& val : row) cout << val << " ";
+        cout << "\n";
     }
-    cout << endl;
-
-    cout << "Test case 4: " << endl;
-    vector<string> result4 = s.findItinerary(tickets4);
-    for (const auto& airport : result4)
+    cout << "Actual:\n";
+    for (const auto& row : matrix2)
     {
-        cout << airport << " ";
+        for (const auto& val : row) cout << val << " ";
+        cout << "\n";
     }
-    cout << endl;
 
+    // Test case 3: Empty matrix
+    vector<vector<int>> matrix3;
+    s.rotate(matrix3);
+    cout << "\nTest case 3:\nEmpty matrix - no output expected\n";
+
+    // Test case 4: 1x1 matrix
+    vector<vector<int>> matrix4 = {{1}};
+    vector<vector<int>> expected4 = {{1}};
+    s.rotate(matrix4);
+    cout << "\nTest case 4:\nExpected:\n";
+    for (const auto& row : expected4)
+    {
+        for (const auto& val : row) cout << val << " ";
+        cout << "\n";
+    }
+    cout << "Actual:\n";
+    for (const auto& row : matrix4)
+    {
+        for (const auto& val : row) cout << val << " ";
+        cout << "\n";
+    }
     return 0;
 }
